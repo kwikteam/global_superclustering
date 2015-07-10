@@ -88,12 +88,32 @@ def make_full_adjacency(adj):
     return full_adjacency
     
 def make_channel_order_dict(chorder): 
+    '''
+    chorder is model.channel_order
+    In [13]: model.channel_order
+    Out[13]: 
+    array([  7,  39,   8,  41,   6,  38,   9,  42,   5,  37,  10,  43,   4,
+            36,  11,  44,  35,  12,  45,   2,  34,  13,  46,   1,  33,  14,
+            47,   0,  32,  15,  31,  63,  16,  49,  30,  62,  17,  50,  29,
+            61,  18,  51,  28,  60,  19,  52,  59,  27,  53,  21,  58,  26,
+            54,  22,  57,  25,  55,  23,  56,  24,  71, 103,  72, 105,  70,
+           102,  73, 106,  74, 101,  69, 107,  75, 100,  68, 108,  99,  67,
+           109,  77,  98,  66, 110,  78,  97,  65, 111,  79,  96,  64,  80,
+           127,  95, 113,  81, 126,  94, 114,  82, 125,  93, 115,  83, 124,
+            92, 116, 123,  91, 117,  85, 122,  90, 118,  86, 121,  89, 119,
+            87, 120,  88], dtype=int32)
+
+    In [14]: channel_order_dict[38]
+    Out[14]: 5
+    
+    '''
     channel_order_dict = {}
     for j in np.arange(len(chorder)):
-        channel_order_dict[j] = chorder[j]  
+        #channel_order_dict[j] = chorder[j]  
+        channel_order_dict[chorder[j]] = j
     return channel_order_dict     
     
-def find_unmasked_points_for_channel(masks,fulladj,globalcl_dict): 
+def find_unmasked_points_for_channel(masks,channel_order_dict,fulladj,globalcl_dict): 
     '''For each channel find the indices of the points
      which are unmasked on this channel 
      fulladj = full_adjacency
@@ -101,7 +121,7 @@ def find_unmasked_points_for_channel(masks,fulladj,globalcl_dict):
 
     globalcl_dict.update({'unmasked_indices':{}})
     for channel in fulladj.keys():
-        unmasked = np.where(masks[:,channel]!= 0)
+        unmasked = np.where(masks[:,channel_order_dict[channel]]!= 0)
         globalcl_dict['unmasked_indices'].update({channel:unmasked})
     return globalcl_dict    
         #print(model.probe.adjacency[channel])    
@@ -118,7 +138,7 @@ def find_unmasked_spikegroup(fulladj,globalcl_dict):
         globalcl_dict['unmasked_spikegroup'].update({channel:unmaskedunion})  
     return globalcl_dict
                
-def make_subset_fetmask(fetmask_dict, fetty, triplemasky, fulladj, globalcl_dict, writefetmask = False):
+def make_subset_fetmask(fetmask_dict, fetty, triplemasky, channel_order_dict,fulladj, globalcl_dict, writefetmask = False):
     '''No longer necessary with the new subset feature in KK2,
     but kept here in case. Make .fet and .fmask files for the
     subsets'''  
@@ -149,16 +169,22 @@ if __name__ == "__main__":
     
     #sys.exit()
     basefolder = '/mnt/zserver/Data/multichanspikes/M140528_NS1/20141202/'
-    basename =  basefolder + '20141202_all'    
+    littlename = '20141202_all'  
+    basename =  basefolder + littlename   
     kwik_path = basename + '.kwik'
 
     model = KwikModel(kwik_path)
     #session = Session(kwik_path)
 
     #Make an old-fashioned .fet and .fmask file
-    numb_spikes_to_use = 40000
-    masky = model.masks[:numb_spikes_to_use+1]
-    fetty = model.features[:numb_spikes_to_use+1]
+    #numb_spikes_to_use = 40000
+    if numb_spikes_to_use ==None:
+        masky = model.masks[:]
+        fetty = model.features[:]
+    else:    
+        masky = model.masks[:numb_spikes_to_use+1]
+        fetty = model.features[:numb_spikes_to_use+1]
+    
     triplemasky = np.repeat(masky,3, axis = 1)
     print(masky.shape)
     print(fetty.shape)
@@ -178,16 +204,16 @@ if __name__ == "__main__":
     print('Making full adjacency graph')
     full_adjacency  = make_full_adjacency(model.probe.adjacency)
     print(full_adjacency)
-    embed()
+    
     #active_channels = model.channels
     
     #Channel order dictionary
     channel_order_dict = make_channel_order_dict(model.channel_order)
-    
+    embed()
     #For each channel find the indices of the points which are unmasked on this channel 
     print('Making globalcl_dict')   
     globalcl_dict = {}
-    globalcl_dict = find_unmasked_points_for_channel(masky,full_adjacency,globalcl_dict)
+    globalcl_dict = find_unmasked_points_for_channel(masky,channel_order_dict,full_adjacency,globalcl_dict)
 
 
     #compute indices of spike groups by taking the union of the unmasked indices
