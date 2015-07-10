@@ -224,7 +224,7 @@ if __name__ == "__main__":
  
     #Make dictionary of subset features and masks 
     fetmask_dict = {}
-    make_subset_fetmask(fetmask_dict, fetty, triplemasky, full_adjacency, globalcl_dict)    
+    make_subset_fetmask(fetmask_dict, fetty, triplemasky, channel_order_dict, full_adjacency, globalcl_dict)    
 
     #Run MKK on each subset with the default value of the parameters
     script_params = default_parameters.copy()
