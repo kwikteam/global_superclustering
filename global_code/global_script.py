@@ -145,7 +145,9 @@ def make_subset_fetmask(fetmask_dict, fetty, triplemasky, channel_order_dict,ful
     #fetmask_dict = {}
     fetmask_dict.update({'group_fet':{}, 'group_fmask':{}, 'pcs_inds':{}})
     for channel in fulladj.keys():
-        pcs_inds = pca_licate_indices(list(fulladj[channel]),3)
+        ordchans = [channel_order_dict[x] for x in list(full_adjacency[channel])]
+        pcs_inds = pca_licate_indices(ordchans)
+        #pcs_inds = pca_licate_indices(list(fulladj[channel]),3)
         fetmask_dict['pcs_inds'].update({channel:pcs_inds})
         fetty_group = fetty[:,pcs_inds]
         fetty_little = fetty_group[globalcl_dict['unmasked_spikegroup'][channel],:] 
