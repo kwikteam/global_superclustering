@@ -260,7 +260,7 @@ if __name__ == "__main__":
     subset_schedule = script_params.pop('subset_schedule')
 
 
-    raw_data = load_fet_fmask_to_raw(fetbase, shank, drop_last_n_features=drop_last_n_features)
+    raw_data = load_fet_fmask_to_raw(derived_basename, shank, drop_last_n_features=drop_last_n_features)
     log_message('debug', 'Loading data from .fet and .fmask file took %.2f s' % (time.time()-start_time))
     data = raw_data.to_sparse_data()
     log_message('info', 'Number of spikes in data set: '+str(data.num_spikes))
