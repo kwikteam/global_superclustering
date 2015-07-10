@@ -177,7 +177,7 @@ if __name__ == "__main__":
     #session = Session(kwik_path)
 
     #Make an old-fashioned .fet and .fmask file
-    #numb_spikes_to_use = 40000
+    numb_spikes_to_use = 40000
     if numb_spikes_to_use ==None:
         masky = model.masks[:]
         fetty = model.features[:]
