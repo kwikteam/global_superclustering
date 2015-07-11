@@ -190,10 +190,11 @@ if __name__ == "__main__":
     triplemasky = np.repeat(masky,3, axis = 1)
     print(masky.shape)
     print(fetty.shape)
+    numspikes = masky.shape[0]
 
     #derived_basename = basename
-    newpath = '/home/skadir/globalphy/nicktest/'
-    derived_basename = newpath + 'nick_global'
+    outputpath = '/home/skadir/globalphy/nicktest/'
+    derived_basename = outputpath + 'nick_global_%g'%(numspikes)
 
     fmaskbase = derived_basename + '.fmask.1'
     fetbase = derived_basename + '.fet.1'
@@ -274,7 +275,7 @@ if __name__ == "__main__":
         supercluster_info['kk_sub'].update({channel:kk_sub})
         supercluster_info['sub_spikes'].update({channel:spikes})
     
-    with open('%s_supercluster_info.p'%(basename),'wb') as gg:
+    with open('%s_supercluster_info.p'%(derived_basename),'wb') as gg:
         pickle.dump(supercluster_info,gg)
     
     #Run KK2 on all the subsets
@@ -296,7 +297,7 @@ if __name__ == "__main__":
         os.system(changeperms)   
     
     superinfo = [full_adjacency,globalcl_dict,supercluster_info,superclusters]
-    with open('%s_supercluster.p'%(basename), 'wb') as g:
+    with open('%s_supercluster.p'%(derived_basename), 'wb') as g:
         pickle.dump(superinfo, g)    
     
     
