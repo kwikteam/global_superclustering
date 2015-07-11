@@ -198,8 +198,8 @@ if __name__ == "__main__":
 
     fmaskbase = derived_basename + '.fmask.1'
     fetbase = derived_basename + '.fet.1'
-    #write_fet(fetty, fetbase)
-    #write_mask(triplemasky,fmaskbase)
+    write_fet(fetty, fetbase)
+    write_mask(triplemasky,fmaskbase)
 
     #sys.exit()
 
