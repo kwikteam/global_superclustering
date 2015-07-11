@@ -286,15 +286,15 @@ if __name__ == "__main__":
         supercluster_info['kk_sub'][channel].cluster_mask_starts()
         superclusters[supercluster_info['sub_spikes'][channel],channel] = supercluster_info['kk_sub'][channel].clusters
         
-    for channel in full_adjacency.keys(): 
-        scriptname = basename+'%g'%(channel)
-        scriptstring = '''import klustakwik2 as *
-                  '''
-        scriptfile = open('%s.sh' %(scriptname),'w')
-        scriptfile.write(scriptstring)
-        scriptfile.close()
-        changeperms='chmod 777 %s.sh' %(scriptname)
-        os.system(changeperms)   
+    # for channel in full_adjacency.keys():
+    #     scriptname = basename+'%g'%(channel)
+    #     scriptstring = '''import klustakwik2 as *
+    #               '''
+    #     scriptfile = open('%s.sh' %(scriptname),'w')
+    #     scriptfile.write(scriptstring)
+    #     scriptfile.close()
+    #     changeperms='chmod 777 %s.sh' %(scriptname)
+    #     os.system(changeperms)
     
     superinfo = [full_adjacency,globalcl_dict,supercluster_info,superclusters]
     with open('%s_supercluster.p'%(derived_basename), 'wb') as g:
