@@ -287,7 +287,7 @@ if __name__ == "__main__":
     #with c[:].sync_imports():
     #    import klustakwik2 as *
     c[:].execute('import klustakwik2 as *')
-    c[:]['supercluster_info['kk_sub']']  =   supercluster_info['kk_sub']
+    c[:]['supercluster_info']  =   supercluster_info
     c[:]['full_adjacency'] = full_adjacency
     #v = c[:]
     #v.map()
