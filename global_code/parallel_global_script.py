@@ -284,8 +284,9 @@ if __name__ == "__main__":
     c = Client(profile = 'default')
     lbv = c.load_balanced_view()
     lbv.block = True
-    with c[:].sync_imports():
-        import klustakwik2 as *
+    #with c[:].sync_imports():
+    #    import klustakwik2 as *
+    c[:].execute('import klustakwik2 as *')
     c[:]['supercluster_info['kk_sub']']  =   supercluster_info['kk_sub']
     c[:]['full_adjacency'] = full_adjacency
     #v = c[:]
