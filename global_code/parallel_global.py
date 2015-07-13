@@ -145,7 +145,7 @@ def make_subset_fetmask(fetmask_dict, fetty, triplemasky, channel_order_dict,ful
     #fetmask_dict = {}
     fetmask_dict.update({'group_fet':{}, 'group_fmask':{}, 'pcs_inds':{}})
     for channel in fulladj.keys():
-        ordchans = [channel_order_dict[x] for x in list(full_adjacency[channel])]
+        ordchans = [channel_order_dict[x] for x in list(fulladj[channel])]
         pcs_inds = pca_licate_indices(ordchans,3)
         #pcs_inds = pca_licate_indices(list(fulladj[channel]),3)
         fetmask_dict['pcs_inds'].update({channel:pcs_inds})
@@ -165,6 +165,12 @@ def make_subset_fetmask(fetmask_dict, fetty, triplemasky, channel_order_dict,ful
             write_mask(masky_little,masky_little_name)     
     return fetmask_dict              
 
+def run_subset_KK(kkobj):
+    #supercluster_info['kk_sub'][channel]
+    kkobj.cluster_mask_starts()
+    superclust_par = kkobj.clusters  
+    return superclust_par
+
 if __name__ == "__main__":
     scriptname = os.path.basename(__file__)
     print('Running script: ', os.path.basename(__file__))
@@ -179,7 +185,7 @@ if __name__ == "__main__":
     #session = Session(kwik_path)
 
     #Make an old-fashioned .fet and .fmask file
-    numb_spikes_to_use = 40000
+    numb_spikes_to_use = 4000
     if numb_spikes_to_use ==None:
         masky = model.masks[:]
         fetty = model.features[:]
@@ -212,7 +218,7 @@ if __name__ == "__main__":
     
     #Channel order dictionary
     channel_order_dict = make_channel_order_dict(model.channel_order)
-    embed()
+    #embed()
     #For each channel find the indices of the points which are unmasked on this channel 
     print('Making globalcl_dict')   
     globalcl_dict = {}
@@ -246,7 +252,7 @@ if __name__ == "__main__":
     print(script_params.keys())
     
     # Start timing
-    start_time = time.time()
+    
     shank = 1
 
     drop_last_n_features = script_params.pop('drop_last_n_features')
@@ -260,7 +266,7 @@ if __name__ == "__main__":
     use_mua_cluster = script_params.pop('use_mua_cluster')
     subset_schedule = script_params.pop('subset_schedule')
 
-
+    start_time = time.time()
     raw_data = load_fet_fmask_to_raw(derived_basename, shank, drop_last_n_features=drop_last_n_features)
     log_message('debug', 'Loading data from .fet and .fmask file took %.2f s' % (time.time()-start_time))
     data = raw_data.to_sparse_data()
@@ -281,13 +287,28 @@ if __name__ == "__main__":
     #Run KK2 on all the subsets
     numKK = len(full_adjacency.keys()) #equal to the number of channels
     superclusters = np.zeros((fetty.shape[0],numKK))
+    c = Client(profile = 'default')
+    lbv = c.load_balanced_view()
+    lbv.block = True
+    #with c[:].sync_imports():
+    #    import klustakwik2 as *
+    #c[:].execute('import klustakwik2 as *')
+    c[:].execute('import klustakwik2')
+    c[:].execute('from klustakwik2 import clustering')
+    c[:]['supercluster_info']  =   supercluster_info
+    c[:]['full_adjacency'] = full_adjacency
+    #v = c[:]
+    #v.map()
     start_time2 = time.time()
-    for channel in full_adjacency.keys():
-    #    supercluster_info['kk_sub'][channel].cluster_mask_starts()
-        supercluster_info['kk_sub'][channel].cluster_mask_starts()
-        superclusters[supercluster_info['sub_spikes'][channel],channel] = supercluster_info['kk_sub'][channel].clusters
-    
+    supercluster_results = lbv.map(lambda channel: supercluster_info['kk_sub'][channel].cluster_mask_starts(),full_adjacency.keys())
+    #supercluster_results = lbv.map(lambda channel: run_subset_KK(supercluster_info['kk_sub'][channel]),full_adjacency.keys())
     print('Time taken for parallel clustering %.2f s' %(time.time()-start_time2))
+    #for channel in full_adjacency.keys():
+    #    supercluster_info['kk_sub'][channel].cluster_mask_starts()
+    #    supercluster_info['kk_sub'][channel].cluster_mask_starts()
+    #    superclusters[supercluster_info['sub_spikes'][channel],channel] = supercluster_info['kk_sub'][channel].clusters
+    
+ 
     # for channel in full_adjacency.keys():
     #     scriptname = basename+'%g'%(channel)
     #     scriptstring = '''import klustakwik2 as *
@@ -296,9 +317,11 @@ if __name__ == "__main__":
     #     scriptfile.write(scriptstring)
     #     scriptfile.close()
     #     changeperms='chmod 777 %s.sh' %(scriptname)
-    #     os.system(changeperms)
+    #     os.system(changeperms)   
     
-    superinfo = [full_adjacency,globalcl_dict,supercluster_info,superclusters]
+    #superinfo = [full_adjacency,globalcl_dict,supercluster_info,superclusters]
+    print(supercluster_results)
+    superinfo = [supercluster_results]
     with open('%s_supercluster.p'%(derived_basename), 'wb') as g:
         pickle.dump(superinfo, g)    
     
