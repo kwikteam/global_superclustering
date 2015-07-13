@@ -132,7 +132,10 @@ c = Client(profile = 'default')
 lbv = c.load_balanced_view()
 lbv.block = True
 with c[:].sync_imports():
-    from parallel_global import run_subset_KK
+    import os, sys
+    sys.path.append('/home/skadir/globalphy/global_superclustering/global_code/')
+    import parallel_global
+    #from parallel_global import run_subset_KK
     #import klustakwik2 as *
 
 #c[:].execute('import klustakwik2')
@@ -145,7 +148,7 @@ c[:]['full_adjacency'] = full_adjacency
 print('About to parallelize')
 start_time2 = time.time()
 #supercluster_results = lbv.map(lambda channel: supercluster_info['kk_sub'][channel].cluster_mask_starts(),full_adjacency.keys())
-supercluster_results = lbv.map(lambda channel: run_subset_KK(supercluster_info['kk_sub'][channel]),full_adjacency.keys())
+supercluster_results = lbv.map(lambda channel: parallel_global.run_subset_KK(supercluster_info['kk_sub'][channel]),full_adjacency.keys())
 print('Time taken for parallel clustering %.2f s' %(time.time()-start_time2))
 #for channel in full_adjacency.keys():
 #    supercluster_info['kk_sub'][channel].cluster_mask_starts()
