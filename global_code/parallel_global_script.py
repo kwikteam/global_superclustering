@@ -131,19 +131,21 @@ superclusters = np.zeros((fetty.shape[0],numKK))
 c = Client(profile = 'default')
 lbv = c.load_balanced_view()
 lbv.block = True
-#with c[:].sync_imports():
-#    import klustakwik2 as *
-#c[:].execute('import klustakwik2 as *')
-c[:].execute('import klustakwik2')
-c[:].execute('from klustakwik2 import clustering')
-c[:].execute('import parallel_global')
-c[:]['supercluster_info']  =   supercluster_info
+with c[:].sync_imports():
+    from parallel_global import run_subset_KK
+    #import klustakwik2 as *
+
+#c[:].execute('import klustakwik2')
+#c[:].execute('from klustakwik2 import clustering')
+#c[:].execute('from parallel_global import run_subset_KK')
+c[:]['supercluster_info[\'kk_sub\']']  =   supercluster_info['kk_sub']
 c[:]['full_adjacency'] = full_adjacency
 #v = c[:]
 #v.map()
+print('About to parallelize')
 start_time2 = time.time()
 #supercluster_results = lbv.map(lambda channel: supercluster_info['kk_sub'][channel].cluster_mask_starts(),full_adjacency.keys())
-supercluster_results = lbv.map(lambda channel: parallel_global.run_subset_KK(supercluster_info['kk_sub'][channel]),full_adjacency.keys())
+supercluster_results = lbv.map(lambda channel: run_subset_KK(supercluster_info['kk_sub'][channel]),full_adjacency.keys())
 print('Time taken for parallel clustering %.2f s' %(time.time()-start_time2))
 #for channel in full_adjacency.keys():
 #    supercluster_info['kk_sub'][channel].cluster_mask_starts()
