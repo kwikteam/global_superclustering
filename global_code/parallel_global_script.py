@@ -27,7 +27,7 @@ model = KwikModel(kwik_path)
 #session = Session(kwik_path)
 
 #Make an old-fashioned .fet and .fmask file
-numb_spikes_to_use = 3500
+numb_spikes_to_use = 3700
 if numb_spikes_to_use ==None:
     masky = model.masks[:]
     fetty = model.features[:]
@@ -84,8 +84,8 @@ run_monitoring_server=False,
 save_all_clu=False,
 debug=True,
 start_from_clu=None,
-use_noise_cluster=True,
-use_mua_cluster=True,
+use_noise_cluster=False,
+use_mua_cluster=False,
 subset_schedule=None,
 )
 
@@ -177,7 +177,8 @@ print('Time taken for parallel clustering %.2f s' %(time.time()-start_time2))
 #embed()
    
 for i, channel in enumerate(full_adjacency.keys()):
-    superclusters[supercluster_info['sub_spikes'][channel],i] = supercluster_results[i]
+    superclusters[supercluster_info['sub_spikes'][channel],i] = supercluster_results[i]+1
+    #We add 1 because we don't want 0 to be an acceptable cluster label
     
 
 
