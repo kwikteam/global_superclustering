@@ -177,7 +177,7 @@ print('Time taken for parallel clustering %.2f s' %(time.time()-start_time2))
 #embed()
    
 for i, channel in enumerate(full_adjacency.keys()):
-    superclusters[supercluster_info['sub_spikes'][channel],channel] = supercluster_results[i]
+    superclusters[supercluster_info['sub_spikes'][channel],i] = supercluster_results[i]
     
 
 
