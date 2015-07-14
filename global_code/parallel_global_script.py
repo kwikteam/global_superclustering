@@ -16,6 +16,7 @@ from IPython import embed
 scriptname = os.path.basename(__file__)
 print('Running script: ', os.path.basename(__file__))
 
+#os.system('ipcluster start -n 8')
 #sys.exit()
 basefolder = '/mnt/zserver/Data/multichanspikes/M140528_NS1/20141202/'
 littlename = '20141202_all'  
@@ -26,7 +27,7 @@ model = KwikModel(kwik_path)
 #session = Session(kwik_path)
 
 #Make an old-fashioned .fet and .fmask file
-numb_spikes_to_use = 3000
+numb_spikes_to_use = 3500
 if numb_spikes_to_use ==None:
     masky = model.masks[:]
     fetty = model.features[:]
@@ -122,38 +123,62 @@ for channel in full_adjacency.keys():
     supercluster_info['kk_sub'].update({channel:kk_sub})
     supercluster_info['sub_spikes'].update({channel:spikes})
 
+pickle_info = [supercluster_info, full_adjacency, channel_order_dict]
 with open('%s_supercluster_info.p'%(derived_basename),'wb') as gg:
-    pickle.dump(supercluster_info,gg)
+    pickle.dump(pickle_info,gg)
 
+#sys.exit()
 #Run KK2 on all the subsets
 numKK = len(full_adjacency.keys()) #equal to the number of channels
 superclusters = np.zeros((fetty.shape[0],numKK))
 c = Client(profile = 'default')
 lbv = c.load_balanced_view()
 lbv.block = True
-with c[:].sync_imports():
-    import os, sys
-    sys.path.append('/home/skadir/globalphy/global_superclustering/global_code/')
-    import parallel_global
-    #from parallel_global import run_subset_KK
-    #import klustakwik2 as *
+#with c[:].sync_imports():
+#    import os, sys
+#    sys.path.append('/home/skadir/globalphy/global_superclustering/global_code/')
+    #import parallel_global
+#    from parallel_global import run_subset_KK, squared
+#    from klustakwik2 import clustering
 
 #c[:].execute('import klustakwik2')
-#c[:].execute('from klustakwik2 import clustering')
-#c[:].execute('from parallel_global import run_subset_KK')
-c[:]['supercluster_info[\'kk_sub\']']  =   supercluster_info['kk_sub']
+c[:].execute('import os, sys')
+c[:].execute('sys.path.append(\'/home/skadir/globalphy/global_superclustering/global_code/\')')
+c[:].execute('from klustakwik2 import clustering')
+c[:].execute('from parallel_global import run_subset_KK')
+#c[:].execute('from parallel_global import squared')
+#c[:].execute('print(parallel_global.__file__)')
+
+#c[:]['supercluster_info[\'kk_sub\']']  =   supercluster_info['kk_sub']
+c[:]['supercluster_info']  =   supercluster_info
 c[:]['full_adjacency'] = full_adjacency
+#embed()
+#c[:].run(print('supercluster_info'))
 #v = c[:]
 #v.map()
 print('About to parallelize')
+#embed()
 start_time2 = time.time()
 #supercluster_results = lbv.map(lambda channel: supercluster_info['kk_sub'][channel].cluster_mask_starts(),full_adjacency.keys())
-supercluster_results = lbv.map(lambda channel: parallel_global.run_subset_KK(supercluster_info['kk_sub'][channel]),full_adjacency.keys())
+#supercluster_results = lbv.map(lambda channel: run_subset_KK(channel),full_adjacency.keys())
+#supercluster_results = lbv.map(lambda channel: squared(channel),full_adjacency.keys())
+
+#def parallel_clustering(chan):
+#    clustering = run_subset_KK(supercluster_info['kk_sub'][channel])
+#    return clustering
+
+supercluster_results = lbv.map(lambda channel: run_subset_KK(supercluster_info['kk_sub'][channel]),full_adjacency.keys())
+#supercluster_results = lbv.map(parallel_clustering, full_adjacency.keys()), 
+time_taken_parallel = time.time()-start_time2
 print('Time taken for parallel clustering %.2f s' %(time.time()-start_time2))
 #for channel in full_adjacency.keys():
 #    supercluster_info['kk_sub'][channel].cluster_mask_starts()
 #    supercluster_info['kk_sub'][channel].cluster_mask_starts()
-#    superclusters[supercluster_info['sub_spikes'][channel],channel] = supercluster_info['kk_sub'][channel].clusters
+#embed()
+   
+for i, channel in enumerate(full_adjacency.keys()):
+    superclusters[supercluster_info['sub_spikes'][channel],channel] = supercluster_results[i]
+    
 
 
 # for channel in full_adjacency.keys():
@@ -166,8 +191,8 @@ print('Time taken for parallel clustering %.2f s' %(time.time()-start_time2))
 #     changeperms='chmod 777 %s.sh' %(scriptname)
 #     os.system(changeperms)   
 
-#superinfo = [full_adjacency,globalcl_dict,supercluster_info,superclusters]
-print(supercluster_results)
-superinfo = [supercluster_results]
+superinfo = [time_taken_parallel, full_adjacency, channel_order_dict,globalcl_dict,supercluster_info,supercluster_results, superclusters]
+#print(supercluster_results)
+#superinfo = [supercluster_results]
 with open('%s_supercluster.p'%(derived_basename), 'wb') as g:
     pickle.dump(superinfo, g)    

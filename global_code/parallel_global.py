@@ -112,6 +112,10 @@ def make_channel_order_dict(chorder):
         #channel_order_dict[j] = chorder[j]  
         channel_order_dict[chorder[j]] = j
     return channel_order_dict     
+  
+def make_inverse_dict(dictionaer):
+    '''Only works for a bijective dictionary'''
+    inv_dict = {v:k for k, v in dictionaer.items()}
     
 def find_unmasked_points_for_channel(masks,channel_order_dict,fulladj,globalcl_dict): 
     '''For each channel find the indices of the points
@@ -165,11 +169,27 @@ def make_subset_fetmask(fetmask_dict, fetty, triplemasky, channel_order_dict,ful
             write_mask(masky_little,masky_little_name)     
     return fetmask_dict              
 
+#def run_subset_KK(kkdictobj, full_adjacency):
+    #supercluster_info['kk_sub'][channel]
+#    for channel in full_adjacency.keys():
+#        kkdictobj['kk_sub'][channel].cluster_mask_starts()
+#        superclusters[kkobj['sub_spikes'][channel],channel] = supercluster_info['kk_sub'][channel].clusters
+
 def run_subset_KK(kkobj):
     #supercluster_info['kk_sub'][channel]
     kkobj.cluster_mask_starts()
     superclust_par = kkobj.clusters  
     return superclust_par
+
+def run_subset_KK_chan(kkobject, channel):
+    '''kkobject = supercluster_info['kk_sub']'''
+    kkobject[channel].cluster_mask_starts()
+    superclust_par = kkobject[channel].clusters  
+    return superclust_par  
+
+def squared(x):
+    sq = x*x
+    return sq
 
 if __name__ == "__main__":
     scriptname = os.path.basename(__file__)
