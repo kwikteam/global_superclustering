@@ -1,0 +1,99 @@
+import pickle
+import numpy as np
+
+def sparsify_superclusters(superclusters):
+    num_spikes = superclusters.shape[0]
+    num_KKs = superclusters.shape[1] #120 in this case
+
+    #Run this loop first to determine how large total_used_KKs
+    #needs to be
+    total_used_KKs = 0
+    for i in np.arange(num_spikes):
+        inds, = (superclusters[i,:]>0).nonzero() 
+        #the comma after inds turns the array into a list
+        total_used_KKs += len(inds)
+
+    sparse_all_KKs = np.zeros(total_used_KKs, dtype=int)
+    sparse_all_indices = np.zeros(total_used_KKs, dtype=int)
+    offsets = np.zeros(num_spikes+1, dtype=int)
+    curoff = 0
+
+    for i in np.arange(num_spikes):
+        inds, = (superclusters[i,:]>0).nonzero() 
+        sparse_all_KKs[curoff:curoff+len(inds)] = superclusters[i,inds]
+        sparse_all_indices[curoff:curoff+len(inds)] = inds
+        offsets[i] = curoff
+        curoff += len(inds)    
+    offsets[-1] = curoff    #final value of offsets
+    
+    return GlobalSparseData(sparse_all_KKs, sparse_all_indices, offsets)
+
+def reduce_supermasks_from_arrays(Ostart, Oend, I, K):
+    #Ostart = silly.offsets[:-1]
+    #Oend = silly.offsets[1:]
+    #I = silly.sparse_all_indices
+    #K = silly.sparse_all_KKs
+    
+    x = np.arange(len(Ostart))
+    # converting the array to a string allows for a lexicographic compare
+    # the details of the comparison are irrelevant as long as it is
+    # consistent (for sorting) and never equal if the underlying arrays
+    # are unequal
+    #tuparray = np.array([tup for tup in zip(nut.sparse_all_indices[8:16],nut.sparse_all_KKs[8:16] )])
+    #x = np.array(sorted(x, key=lambda p: I[Ostart[p]:Oend[p]].tostring()), dtype=int)
+    x = np.array(sorted(x, key=lambda p: np.array([tup for tup in zip(I[Ostart[p]:Oend[p]],K[Ostart[p]:Oend[p]])]).tostring()), dtype=int)
+    y = np.empty_like(x)
+    y[x] = np.arange(len(x)) # y is the inverse of x as a permutation
+    # step 2: iterate through all indices and add to collection if the
+    # indices have changed
+    oldstr = None
+    new_indices = []
+    start = np.zeros(len(Ostart), dtype=int)
+    end = np.zeros(len(Ostart), dtype=int)
+    curstart = 0 #current start
+    curend = 0 #current end
+    for i, p in enumerate(x):
+        #curind = I[Ostart[p]:Oend[p]]
+        curind = np.array([tup for tup in zip(I[Ostart[p]:Oend[p]],K[Ostart[p]:Oend[p]])])
+       # if i<5:
+       #    print(curind)
+       #     print(curind.shape)
+        #    print(len(curind))
+        curstr = curind.tostring()
+        if curstr!=oldstr:
+            new_indices.append(curind)
+            oldstr = curstr
+            curstart = curend
+            curend += len(curind)
+        start[i] = curstart
+        end[i] = curend
+    # step 3: convert into start, end
+    #print(new_indices)
+    sparse_indices = np.concatenate(new_indices, axis = 0)
+    #num_unique_superclusters = len(new_indices)
+    return sparse_indices, new_indices, start[y], end[y]
+#, num_unique_superclusters
+
+def reduce_supermasks(superdata):
+    # step 1: sort into lexicographical order of masks
+    start = superdata.offsets[:-1]#set of starts
+    end = superdata.offsets[1:]# set of ends
+    I = superdata.sparse_all_indices
+    K = superdata.sparse_all_KKs
+    return reduce_supermasks_from_arrays(start, end, I, K)
+
+class GlobalSparseData(object):
+    '''Sparse data for global superclustering'''
+    def __init__(self,
+                sparse_all_KKs, sparse_all_indices, 
+                 offsets):
+        self.sparse_all_KKs = sparse_all_KKs
+        self.sparse_all_indices = sparse_all_indices
+        self.offsets = offsets
+    
+    def to_sparse_data(self):
+        values_start = self.offsets[:-1]
+        values_end = self.offsets[1:]
+        supersparsekks, superlistkks, super_start, super_end=  reduce_supermasks(self)
+        return supersparsekks, superlistkks, super_start, super_end
+        #return superkks, super_start, super_end, num_uniq_superclusters
