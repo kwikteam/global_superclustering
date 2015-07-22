@@ -92,6 +92,10 @@ def superclusters_with_over_nspikes(super_frequency, spikes_per_cluster):
         '''
     inds, = (super_frequency > spikes_per_cluster).nonzero()
     return inds
+  
+def superclusters_with_exactly_nspikes(super_frequency, spikes_per_cluster):
+    inds, = (super_frequency == spikes_per_cluster).nonzero()
+    return inds  
 
 class GlobalSparseData(object):
     '''Sparse data for global superclustering'''
@@ -116,16 +120,20 @@ class GlobalSparseData(object):
         self.ordering_perm = x
         self.inv_ordering_perm = y
         return supersparsekks, superlistkks, super_start, super_end,unique_superclusters, super_frequency, x, y
-    
-    def superclusters_with_morethan_nspikes(self):
+
+    def supercluster_distribution(self):
         max_freq = np.amax(self.super_frequency)
         #print(max_freq)
         min_freq = np.amin(self.super_frequency)
         #print(min_freq)
         biggersupercluster_indict = {}
-        for spikes_per_cluster in np.arange(min_freq, max_freq):
+        distribution_superclusterdict = {}
+        for spikes_per_cluster in np.arange(min_freq-1, max_freq):
             indie = superclusters_with_over_nspikes(silly.super_frequency, spikes_per_cluster)
             biggersupercluster_indict[spikes_per_cluster] = indie
-        self.biggersupercluster_indict = biggersupercluster_indict    
-        return biggersupercluster_indict
-   
+            indie_dist = superclusters_with_exactly_nspikes(silly.super_frequency, spikes_per_cluster)
+            distribution_superclusterdict[spikes_per_cluster] = indie_dist
+        self.biggersupercluster_indict = biggersupercluster_indict 
+        self.distribution_superclusterdict = distribution_superclusterdict
+        return biggersupercluster_indict, distribution_superclusterdict
+       
