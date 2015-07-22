@@ -82,6 +82,17 @@ def reduce_supermasks(superdata):
     K = superdata.sparse_all_KKs
     return reduce_supermasks_from_arrays(start, end, I, K)
 
+def superclusters_with_over_nspikes(super_frequency, spikes_per_cluster):
+    '''Find the indices of the superclusters which contain more than spikes_per_cluster
+        spikes
+        #print(inds)
+    ##print(super_frequency[inds])
+    #for a, b in zip(silly.super_start[inds], silly.super_end[inds]):
+    #    print(silly.supersparsekks[a:b,:])
+        '''
+    inds, = (super_frequency > spikes_per_cluster).nonzero()
+    return inds
+
 class GlobalSparseData(object):
     '''Sparse data for global superclustering'''
     def __init__(self,
@@ -90,10 +101,31 @@ class GlobalSparseData(object):
         self.sparse_all_KKs = sparse_all_KKs
         self.sparse_all_indices = sparse_all_indices
         self.offsets = offsets
-    
+
     def to_sparse_data(self):
         values_start = self.offsets[:-1]
         values_end = self.offsets[1:]
-        supersparsekks, superlistkks, super_start, super_end=  reduce_supermasks(self)
-        return supersparsekks, superlistkks, super_start, super_end
-        #return superkks, super_start, super_end, num_uniq_superclusters
+        supersparsekks, superlistkks, super_start, super_end, unique_superclusters,\
+              super_frequency, x, y  =  reduce_supermasks(self)
+        self.supersparsekks = supersparsekks
+        self.superlistkks = superlistkks
+        self.super_start = super_start
+        self.super_end = super_end
+        self.unique_superclusters = unique_superclusters
+        self.super_frequency = super_frequency
+        self.ordering_perm = x
+        self.inv_ordering_perm = y
+        return supersparsekks, superlistkks, super_start, super_end,unique_superclusters, super_frequency, x, y
+    
+    def superclusters_with_morethan_nspikes(self):
+        max_freq = np.amax(self.super_frequency)
+        #print(max_freq)
+        min_freq = np.amin(self.super_frequency)
+        #print(min_freq)
+        biggersupercluster_indict = {}
+        for spikes_per_cluster in np.arange(min_freq, max_freq):
+            indie = superclusters_with_over_nspikes(silly.super_frequency, spikes_per_cluster)
+            biggersupercluster_indict[spikes_per_cluster] = indie
+        self.biggersupercluster_indict = biggersupercluster_indict    
+        return biggersupercluster_indict
+   

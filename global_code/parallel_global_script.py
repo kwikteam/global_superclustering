@@ -23,11 +23,13 @@ littlename = '20141202_all'
 basename =  basefolder + littlename   
 kwik_path = basename + '.kwik'
 
+separatepickle = False
+
 model = KwikModel(kwik_path)
 #session = Session(kwik_path)
 
 #Make an old-fashioned .fet and .fmask file
-numb_spikes_to_use = 3700
+numb_spikes_to_use = None
 if numb_spikes_to_use ==None:
     masky = model.masks[:]
     fetty = model.features[:]
@@ -46,8 +48,14 @@ derived_basename = outputpath + 'nick_global_%g'%(numspikes)
 
 fmaskbase = derived_basename + '.fmask.1'
 fetbase = derived_basename + '.fet.1'
-pg.write_fet(fetty, fetbase)
-pg.write_mask(triplemasky,fmaskbase)
+
+if not os.path.isfile(fetbase):
+    print('Writing %s file'%(fetbase))
+    pg.write_fet(fetty, fetbase)
+if not os.path.isfile(fmaskbase):   
+    print('Writing %s file'%(fmaskbase))
+    pg.write_mask(triplemasky,fmaskbase)
+
 
 #sys.exit()
 
@@ -72,12 +80,36 @@ globalcl_dict = pg.find_unmasked_points_for_channel(masky,channel_order_dict,ful
 globalcl_dict = pg.find_unmasked_spikegroup(full_adjacency,globalcl_dict)
 
 #Make dictionary of subset features and masks 
+#This gives memory errors on large datasets
 fetmask_dict = {}
-pg.make_subset_fetmask(fetmask_dict, fetty, triplemasky, channel_order_dict, full_adjacency, globalcl_dict)    
+fetmask_dict = pg.make_subset_fetmask(fetmask_dict, fetty, triplemasky, channel_order_dict, full_adjacency, globalcl_dict)    
 
 #Run MKK on each subset with the default value of the parameters
 script_params = default_parameters.copy()
 script_params.update(
+prior_point=1,
+mua_point=2,
+noise_point=1,
+points_for_cluster_mask=1,
+penalty_k=0.0,
+penalty_k_log_n=1.0,
+max_iterations=1000,
+num_starting_clusters=50,
+num_changed_threshold=0.05,
+full_step_every=1,
+split_first=20,
+split_every=40,
+max_possible_clusters=1000,
+dist_thresh=log(10000.0),
+max_quick_step_candidates=100000000, # this uses around 760 MB RAM
+max_quick_step_candidates_fraction=0.4,
+always_split_bimodal=False,
+subset_break_fraction=0.01,
+break_fraction=0.0,
+fast_split=False,
+max_split_iterations=None,
+consider_cluster_deletion=True,
+num_cpus=1,
 drop_last_n_features=0,
 save_clu_every=None,
 run_monitoring_server=False,
@@ -175,6 +207,15 @@ print('Time taken for parallel clustering %.2f s' %(time.time()-start_time2))
 #    supercluster_info['kk_sub'][channel].cluster_mask_starts()
 #    supercluster_info['kk_sub'][channel].cluster_mask_starts()
 #embed()
+
+#Broadcast the shapes for debugging
+for i, channel in enumerate(full_adjacency.keys()):
+    #print(channel, i)
+    print(channel, supercluster_info['sub_spikes'][channel].shape, supercluster_results[i].shape)
+    
+par_results = [supercluster_results]
+with open('%s_supercluster_par_results.p'%(derived_basename), 'wb') as g:
+    pickle.dump(par_results, g)    
    
 for i, channel in enumerate(full_adjacency.keys()):
     superclusters[supercluster_info['sub_spikes'][channel],i] = supercluster_results[i]+1
