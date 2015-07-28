@@ -1,5 +1,6 @@
 import pickle
 import numpy as np
+from .supercluster import *
 
 def sparsify_superclusters(superclusters):
     num_spikes = superclusters.shape[0]
@@ -26,7 +27,7 @@ def sparsify_superclusters(superclusters):
         curoff += len(inds)    
     offsets[-1] = curoff    #final value of offsets
     
-    return GlobalSparseData(sparse_all_KKs, sparse_all_indices, offsets)
+    return GlobalSparseData(sparse_all_KKs, sparse_all_indices, offsets, num_KKs)
 
 def reduce_supermasks_from_arrays(Ostart, Oend, I, K):
     #Ostart = silly.offsets[:-1]
@@ -101,10 +102,11 @@ class GlobalSparseData(object):
     '''Sparse data for global superclustering'''
     def __init__(self,
                 sparse_all_KKs, sparse_all_indices, 
-                 offsets):
+                 offsets, numKKs):
         self.sparse_all_KKs = sparse_all_KKs
         self.sparse_all_indices = sparse_all_indices
         self.offsets = offsets
+        self.numKKs = numKKs
 
     def to_sparse_data(self):
         values_start = self.offsets[:-1]
@@ -119,6 +121,7 @@ class GlobalSparseData(object):
         self.super_frequency = super_frequency
         self.ordering_perm = x
         self.inv_ordering_perm = y
+        self.num_spikes = super_start.shape[0]
         return supersparsekks, superlistkks, super_start, super_end,unique_superclusters, super_frequency, x, y
 
     def supercluster_distribution(self):
@@ -136,4 +139,7 @@ class GlobalSparseData(object):
         self.biggersupercluster_indict = biggersupercluster_indict 
         self.distribution_superclusterdict = distribution_superclusterdict
         return biggersupercluster_indict, distribution_superclusterdict
+      
+  #  def clump_fine_clustering(self, cluster_with_morethan):
+   #     clusters = np.full
        
