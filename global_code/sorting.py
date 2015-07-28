@@ -101,6 +101,10 @@ def superclusters_with_over_nspikes(super_frequency, spikes_per_cluster):
 def superclusters_with_exactly_nspikes(super_frequency, spikes_per_cluster):
     inds, = (super_frequency == spikes_per_cluster).nonzero()
     return inds  
+  
+def test_supercluster_mask_difference(supersparsekks, superstart, superend, candidate_id, candidate_end):
+    d =supercluster_mask_difference_pyt(supersparsekks, superstart, superend, candidate_id, candidate_end)
+    return d
 
 class GlobalSparseData(object):
     '''Sparse data for global superclustering'''
@@ -157,6 +161,6 @@ class GlobalSparseData(object):
         print(cand_cluster_label)
         clump_clustering(clusters, candidate_ids_start, candidate_ids_end, self.supersparsekks, self.super_start, self.super_end,
                         allspikes, self.numKKs, cand_cluster_label)
-        return clusters      
+        return clusters, cand_cluster_label    
 
        
