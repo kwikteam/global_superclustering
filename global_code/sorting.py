@@ -129,9 +129,9 @@ class GlobalSparseData(object):
         biggersupercluster_indict = {}
         distribution_superclusterdict = {}
         for spikes_per_cluster in np.arange(min_freq-1, max_freq):
-            indie = superclusters_with_over_nspikes(silly.super_frequency, spikes_per_cluster)
+            indie = superclusters_with_over_nspikes(self.super_frequency, spikes_per_cluster)
             biggersupercluster_indict[spikes_per_cluster] = indie
-            indie_dist = superclusters_with_exactly_nspikes(silly.super_frequency, spikes_per_cluster)
+            indie_dist = superclusters_with_exactly_nspikes(self.super_frequency, spikes_per_cluster)
             distribution_superclusterdict[spikes_per_cluster] = indie_dist
         self.biggersupercluster_indict = biggersupercluster_indict 
         self.distribution_superclusterdict = distribution_superclusterdict
