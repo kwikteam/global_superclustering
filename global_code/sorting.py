@@ -71,9 +71,12 @@ def reduce_supermasks_from_arrays(Ostart, Oend, I, K):
     # step 3: convert into start, end
     #print(new_indices)
     sparse_indices = np.concatenate(new_indices, axis = 0)
+    unique_superclusters, frequency = np.unique(start, return_counts = True)
     #num_unique_superclusters = len(new_indices)
-    return sparse_indices, new_indices, start[y], end[y]
-#, num_unique_superclusters
+    return sparse_indices, new_indices, start[y], end[y], unique_superclusters, frequency, x, y
+    #return sparse_indices, new_indices, start[y], end[y]
+#, num_unique_superclusters        
+
 
 def reduce_supermasks(superdata):
     # step 1: sort into lexicographical order of masks
