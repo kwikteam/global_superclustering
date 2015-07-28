@@ -154,11 +154,18 @@ class GlobalSparseData(object):
         clusters = np.full(self.num_spikes, -1, dtype = int) 
         #If we get any clusters labelled -1 then there is some horrific bug!
         allspikes = np.arange(self.num_spikes)
-        chosen_superclusterids = self.biggersupercluster_indict[clusters_withatleast]
+        try:
+            chosen_superclusterids = self.biggersupercluster_indict[clusters_withatleast]
+        except KeyError:     
+            max_atleast = np.amax(list(self.biggersupercluster_indict.keys()))
+            print('There are no clusters with more than %d points \n'%(clusters_withatleast))
+            print('Setting clusters_withatleast to %d'%(max_atleast))
+            chosen_superclusterids = self.biggersupercluster_indict[max_atleast]
+            
         candidate_ids_start = self.unique_superclusters[chosen_superclusterids]
         candidate_ids_end = self.unique_superclusters_ends[chosen_superclusterids]
         cand_cluster_label = {startid:cluster_label for cluster_label, startid in enumerate(candidate_ids_start)}   
-        print(cand_cluster_label)
+        #print(cand_cluster_label)
         clump_clustering(clusters, candidate_ids_start, candidate_ids_end, self.supersparsekks, self.super_start, self.super_end,
                         allspikes, self.numKKs, cand_cluster_label)
         return clusters, cand_cluster_label    
