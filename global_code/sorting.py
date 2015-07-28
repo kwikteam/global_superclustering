@@ -72,10 +72,11 @@ def reduce_supermasks_from_arrays(Ostart, Oend, I, K):
     #print(new_indices)
     sparse_indices = np.concatenate(new_indices, axis = 0)
     unique_superclusters, frequency = np.unique(start, return_counts = True)
+    unique_superclusters_ends = np.unique(end)                                           
     #num_unique_superclusters = len(new_indices)
-    return sparse_indices, new_indices, start[y], end[y], unique_superclusters, frequency, x, y
+    return sparse_indices, new_indices, start[y], end[y], unique_superclusters, unique_superclusters_ends,frequency, x, y
     #return sparse_indices, new_indices, start[y], end[y]
-#, num_unique_superclusters        
+#, num_unique_superclusters  
 
 
 def reduce_supermasks(superdata):
@@ -116,16 +117,20 @@ class GlobalSparseData(object):
         values_end = self.offsets[1:]
         supersparsekks, superlistkks, super_start, super_end, unique_superclusters,\
               super_frequency, x, y  =  reduce_supermasks(self)
+        supersparsekks, superlistkks, super_start, super_end, unique_superclusters,\
+              unique_superclusters_ends, super_frequency, x, y  =  reduce_supermasks(self)
         self.supersparsekks = supersparsekks
         self.superlistkks = superlistkks
         self.super_start = super_start
         self.super_end = super_end
         self.unique_superclusters = unique_superclusters
+        self.unique_superclusters_ends = unique_superclusters_ends
         self.super_frequency = super_frequency
         self.ordering_perm = x
         self.inv_ordering_perm = y
         self.num_spikes = super_start.shape[0]
-        return supersparsekks, superlistkks, super_start, super_end,unique_superclusters, super_frequency, x, y
+        return supersparsekks, superlistkks, super_start, super_end,unique_superclusters, \
+     unique_superclusters_ends, super_frequency, x, y
 
     def supercluster_distribution(self):
         max_freq = np.amax(self.super_frequency)
@@ -142,7 +147,17 @@ class GlobalSparseData(object):
         self.biggersupercluster_indict = biggersupercluster_indict 
         self.distribution_superclusterdict = distribution_superclusterdict
         return biggersupercluster_indict, distribution_superclusterdict
-      
-  #  def clump_fine_clustering(self, cluster_with_morethan):
-   #     clusters = np.full
+
+    def clump_fine_clustering(self, clusters_withatleast):
+        clusters = np.full(self.num_spikes, -1, dtype = int) 
+        #If we get any clusters labelled -1 then there is some horrific bug!
+        allspikes = np.arange(self.num_spikes)
+        chosen_superclusterids = self.biggersupercluster_indict[clusters_withatleast]
+        candidate_ids_start = self.unique_superclusters[chosen_superclusterids]
+        candidate_ids_end = self.unique_superclusters_end[chosen_superclusterids]
+        cand_cluster_label = {startid:cluster_label for cluster_label, startid in enumerate(candidate_ids_start)}   
+        clump_clustering(clusters, candidate_ids_start, candidate_ids_end, self.supersparsekks, self.super_start, self.super_end,
+                        allspikes, self.numKKs, cand_cluster_label)
+        return clusters      
+
        

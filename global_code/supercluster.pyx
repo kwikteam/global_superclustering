@@ -12,7 +12,7 @@ from cython cimport integral, floating
 
 from libcpp.vector cimport vector
 
-cdef integral supercluster_mask_difference(integral[:] supersparsekks, integral start1, integral end1, integral start2, integral end2):
+cdef integral supercluster_mask_difference(integral[:,:] supersparsekks, integral start1, integral end1, integral start2, integral end2):
     cdef integral i1, i2, u1, u2, v1, v2, d
     #cdef integral n1 = end1-start1
     #cdef integral n2 = end2-start2
