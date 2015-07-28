@@ -1,6 +1,6 @@
 import pickle
 import numpy as np
-from .supercluster import *
+from supercluster import *
 
 def sparsify_superclusters(superclusters):
     num_spikes = superclusters.shape[0]
@@ -116,8 +116,6 @@ class GlobalSparseData(object):
         values_start = self.offsets[:-1]
         values_end = self.offsets[1:]
         supersparsekks, superlistkks, super_start, super_end, unique_superclusters,\
-              super_frequency, x, y  =  reduce_supermasks(self)
-        supersparsekks, superlistkks, super_start, super_end, unique_superclusters,\
               unique_superclusters_ends, super_frequency, x, y  =  reduce_supermasks(self)
         self.supersparsekks = supersparsekks
         self.superlistkks = superlistkks
@@ -154,8 +152,9 @@ class GlobalSparseData(object):
         allspikes = np.arange(self.num_spikes)
         chosen_superclusterids = self.biggersupercluster_indict[clusters_withatleast]
         candidate_ids_start = self.unique_superclusters[chosen_superclusterids]
-        candidate_ids_end = self.unique_superclusters_end[chosen_superclusterids]
+        candidate_ids_end = self.unique_superclusters_ends[chosen_superclusterids]
         cand_cluster_label = {startid:cluster_label for cluster_label, startid in enumerate(candidate_ids_start)}   
+        print(cand_cluster_label)
         clump_clustering(clusters, candidate_ids_start, candidate_ids_end, self.supersparsekks, self.super_start, self.super_end,
                         allspikes, self.numKKs, cand_cluster_label)
         return clusters      

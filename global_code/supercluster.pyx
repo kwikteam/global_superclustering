@@ -30,10 +30,10 @@ cdef integral supercluster_mask_difference(integral[:,:] supersparsekks, integra
             d += 1
             i1 += 1
             continue
-	u1 = supersparsekks[i1,0]  
-	u2 = supersparsekks[i2,0]
-	v1 = supersparsekks[i1,1]
-	v2 = supersparsekks[i2,1]
+        u1 = supersparsekks[i1,0]  
+        u2 = supersparsekks[i2,0]
+        v1 = supersparsekks[i1,1]
+        v2 = supersparsekks[i2,1]
         #u1 = unmasked[i1]
         #u2 = unmasked[i2]
         if (u1==u2 and v1==v2):
@@ -42,9 +42,9 @@ cdef integral supercluster_mask_difference(integral[:,:] supersparsekks, integra
             i1 += 1
             i2 += 1
         elif (u1==u2 and v1!=v2):
-	    i1 += 1
-	    i2 += 1
-	    d += 1
+            i1 += 1
+            i2 += 1
+            d += 1
         elif u1<u2:
             # we remove u1 from the pool and it didn't match, so we increase the distance
             d += 1
@@ -63,7 +63,7 @@ cpdef clump_clustering(integral[:] clusters,
                      integral[:] superstart,
                      integral[:] superend,
                      integral[:] allspikes,
-                     integral numKKs
+                     integral numKKs,
                      dict cand_cluster_label,
                      ):
     cdef vector[integral] best_ids
@@ -82,14 +82,14 @@ cpdef clump_clustering(integral[:] clusters,
             best_distance = numKKs+1
             best_ids.clear()
             for c_idx in range(candidate_ids.size()):
-	        candidate_id = candidate_ids_start[c_idx]
+                candidate_id = candidate_ids_start[c_idx]
                 candidate_end = candidate_ids_end[c_idx]
-	        d = supercluster_mask_difference(supersparsekks, superstart[p], superend[p], candidate_id, candidate_end)  
-	        if d==best_distance:
+                d = supercluster_mask_difference(supersparsekks, superstart[p], superend[p], candidate_id, candidate_end)  
+                if d==best_distance:
                     best_ids.push_back(candidate_id)
                 elif d<best_distance:
                     best_distance = d
                     best_ids.clear()
                     best_ids.push_back(candidate_id)
                 best_id = best_ids[randint(best_ids.size())]   #if there are many equidistant superclusters, take a random one
-	        clusters[p] = cand_cluster_label[best_id]
+                clusters[p] = cand_cluster_label[best_id]
