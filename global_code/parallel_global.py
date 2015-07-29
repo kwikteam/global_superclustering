@@ -1,23 +1,77 @@
 from phy.io import KwikModel
-from phy.cluster.session import Session
+#from phy.cluster.session import Session
+from phy.session import Session
 import phy
 phy.__version__
 from klustakwik2 import *
 #import hashutils
 import numpy as np
 import pickle
+import tables as tb
 import sys
 import os
 import copy
 import time
 from IPython.parallel import Client
 from IPython import embed
+import h5py
+from phy.io.h5 import open_h5
+from phy.io.kwik.creator import KwikCreator, _write_by_chunk, create_kwik
 
+def open_h5(filename, mode=None):
+    """Open an HDF5 file and return a File instance."""
+    file = File(filename, mode=mode)
+    file.open()
+    return file
 
+#def reduce_kwik_file_bad(kwik_path,filename, num_spikes):
+    '''This function does not work'''
+#    kwikfile = kwik_path + filename + '.kwik'
+#    with tb.openFile(kwikfile, mode = 'a') as kwikfile:
+#        samptimes = kwikfile.root.channel_groups._f_getChild('1').spikes.time_samples[:100]
+#        kwikfile.root.channel_groups._f_getChild('1').spikes.time_samples= kwikfile.root.channel_groups._f_getChild('1').spikes.time_samples[:num_spikes]
+#        kwikfile.root.channel_groups._f_getChild('1').spikes.time_fractional= kwikfile.root.channel_groups._f_getChild('1').spikes.time_fractional[:num_spikes]
+        
+        #kwikfile.root.channel_groups[0].spikes.time_samples = kwikfile.channel_groups[0].spikes.time_samples[:num_spikes]
+        #kwikfile.channel_groups[0].spikes.time_fractional = kwikfile.channel_groups[0].spikes.time_fractional[:num_spikes]
+       # kwikfile.
 
-
-
-
+def reduce_kwik_file(kwik_path_dir, parent_filename, baby_filename, num_spikes):
+    '''Create a smaller baby kwikfile with only a subset of the spikes
+       but with all the same metadata'''
+    basename =    os.path.join(kwik_path_dir, parent_filename)
+    model = KwikModel(basename)
+    babybasename = os.path.join(kwik_path_dir, baby_filename)
+    kwdname = kwik_path_dir + parent_filename + '.raw.kwd'
+    creator = KwikCreator(babybasename)
+    creator.create_empty()
+    creator.set_metadata('/application_data/spikedetekt',**model.metadata)
+    
+    #Derive properties from parent to be assigned to baby
+    n_channels = model.n_channels
+    n_features = model.n_features_per_channel
+    babygroup = model.channel_group 
+    spike_samples = model.spike_samples[:num_spikes]
+    features = model.features[:num_spikes]
+    masks = model.masks[:num_spikes]
+    creator.add_spikes(group=babygroup,
+                       spike_samples=spike_samples,
+                       features=features.astype(np.float32),
+                       masks=masks.astype(np.float32),
+                       n_channels=n_channels,
+                       n_features=n_features,
+                       )
+    #Add probe info
+    probedict = model.probe._probe
+    creator.set_probe(probedict)
+    #Add kwd info
+    sample_rate = model.sample_rate
+    creator._add_recordings_from_kwd(kwdname,sample_rate=sample_rate,)
+    
+def add_clustering_to_kwik(kwik_path_dir, filename, clustering_name, clu_array):
+    basename =    os.path.join(kwik_path_dir, filename)
+    model = KwikModel(basename)
+    model.add_clustering(clustering_name, clu_array)
 
 def write_mask(mask, filename, fmt="%f"):
     fd = open(filename, 'w')
