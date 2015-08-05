@@ -2,6 +2,8 @@ from numpy import *
 from numpy.random import randint
 import hashlib
 from hamming_maskstarts import hamming_maskstarts
+#import compute_penalty
+# compute_cluster_bern
 
 class PartitionError(Exception):
     pass
@@ -66,7 +68,7 @@ class KK(object):
       defined additional arguments and keyword arguments.
     '''
     def __init__(self, data, callbacks=None, name = '',
-                 **params):
+                 is_copy=False, **params):
         
         self.name = name
         if callbacks is None:
@@ -74,9 +76,9 @@ class KK(object):
         self.callbacks = callbacks
         self.data = data
         self.cluster_hashes = set()
-       
+        self.is_copy = is_copy
         # user parameters
-        show_params = name=='' and not is_subset and not is_copy
+        show_params = name=='' and not is_copy
         self.params = params
         actual_params = default_parameters.copy()
         for k, v in iteritems(params):
@@ -112,16 +114,11 @@ class KK(object):
         log_message(level, msg, name=name)        
 
     def copy(self, name='kk_copy',
-             use_noise_cluster=None, use_mua_cluster=None,
              **additional_params):
         if self.name:
             sep = '.'
         else:
             sep = ''
-        if use_noise_cluster is None:
-            use_noise_cluster = self.use_noise_cluster
-        if use_mua_cluster is None:
-            use_mua_cluster = self.use_mua_cluster
         params = self.params.copy()
         params.update(**additional_params)
         return KK(self.data, name=self.name+sep+name,
@@ -161,9 +158,8 @@ class KK(object):
 
         while self.current_iteration<self.max_iterations:
             self.MEC_steps()
-            self.compute_cluster_penalties()
-            # only delete after a full step to simplify quick steps
-            if recurse and self.full_step and self.consider_cluster_deletion:
+            self.compute_penalty() 
+            if recurse and self.consider_cluster_deletion:
                 self.consider_deletion()
             old_score = score
             old_score_raw = score_raw
@@ -275,20 +271,25 @@ class KK(object):
         denom = float(denom)
         
         # Arrays that will be used in E-step part
-        
-        self.old_clusters = self.clusters
-        self.clusters = -ones(num_spikes, dtype=int) #set them to -1 to avoid bugs
-        self.clusters_second_best = -ones(num_spikes, dtype=int)
-        if hasattr(self, 'log_p_best'):
-            self.old_log_p_best = self.log_p_best
-        self.log_p_best = inf*ones(num_spikes)
-        self.log_p_second_best = inf*ones(num_spikes)
+        if only_evaluate_current_clusters:
+            self.clusters_second_best = zeros(0, dtype=int)
+            self.log_p_best = empty(num_spikes)
+            self.log_p_second_best = empty(0)
+        else:    
+            self.old_clusters = self.clusters
+            self.clusters = -ones(num_spikes, dtype=int) #set them to -1 to avoid bugs
+            self.clusters_second_best = -ones(num_spikes, dtype=int)
+            if hasattr(self, 'log_p_best'):
+                self.old_log_p_best = self.log_p_best
+            self.log_p_best = inf*ones(num_spikes)
+            self.log_p_second_best = inf*ones(num_spikes)
         
 
         num_skipped = 0
         
-        self.clusters[:] = self.noise_cluster
-        self.log_p_best[:] = -log(noise_weight)
+        if not only_evaluate_current_clusters:
+            self.clusters[:] = self.noise_cluster
+            self.log_p_best[:] = -log(noise_weight)
         
         clusters_to_kill = []
         
@@ -323,6 +324,11 @@ class KK(object):
         self.partition_clusters()
 
     @add_slots
+    def compute_penalty(self, clusters=None):
+        penalty = compute_penalty(self, clusters)
+        return penalties
+
+    @add_slots
     def consider_deletion(self):
         num_cluster_members = self.num_cluster_members
         num_clusters = self.num_clusters_alive
@@ -345,7 +351,7 @@ class KK(object):
             cursic = sic[sico[cluster]:sico[cluster+1]]
             new_clusters[cursic] = self.clusters_second_best[cursic]
             # compute penalties if we reassigned this
-            penalties = self.compute_cluster_penalties(new_clusters)
+            penalties = self.compute_penalty(new_clusters)
             new_score = score_raw+deletion_loss[cluster]+sum(penalties)
             cur_improvement = score-new_score # we want improvement to be a positive value
             if cur_improvement>improvement:
@@ -366,7 +372,7 @@ class KK(object):
             # at this point we have invalidated the partitions, so to make sure we don't miss
             # something, we wipe them out here
             self.partition_clusters()
-            self.compute_cluster_penalties() # and recompute the penalties
+            self.compute_penalty() # and recompute the penalties
             # we've also invalidated the second best log_p and clusters
             self.log_p_second_best = None
             self.clusters_second_best = None
@@ -543,7 +549,7 @@ class KK(object):
                     K3.initialise_clusters(clusters)
                     K3.prepare_for_iterate()
                     K3.MEC_steps(only_evaluate_current_clusters=True)
-                    K3.compute_cluster_penalties()
+                    K3.compute_penalty()
                     score_ref, _, _ = K3.compute_score()
 
                 I1 = (K2.clusters==1)
@@ -552,7 +558,7 @@ class KK(object):
                 K3.initialise_clusters(clusters)
                 K3.prepare_for_iterate()
                 K3.MEC_steps(only_evaluate_current_clusters=True)
-                K3.compute_cluster_penalties()
+                K3.compute_penalty()
                 score_new, _, _ = K3.compute_score()
 
             if score_new<score_ref:
