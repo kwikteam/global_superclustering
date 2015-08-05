@@ -4,6 +4,8 @@ import hashlib
 from hamming_maskstarts import hamming_maskstarts
 #import compute_penalty
 # compute_cluster_bern
+from default_parameters import default_parameters
+import time
 
 class PartitionError(Exception):
     pass
