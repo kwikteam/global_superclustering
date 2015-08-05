@@ -314,7 +314,7 @@ class KK(object):
             self.run_callbacks('e_step_before_main_loop',  cluster=cluster,
                                )
                 
-            compute_log_p_and_assign(self, cluster, weight, self.num_cpus)
+            compute_log_p_and_assign(self, cluster, weight, self.num_cpus, only_evaluate_current_clusters)
             
             self.run_callbacks('e_step_after_main_loop')
 
@@ -345,7 +345,7 @@ class KK(object):
         score, score_raw, score_penalty = self.compute_score()
         candidate_cluster = -1
         improvement = -inf
-        for cluster in range(self.num_special_clusters, num_clusters):
+        for cluster in range(num_clusters):
             new_clusters = self.clusters.copy()
             # reassign points
             cursic = sic[sico[cluster]:sico[cluster+1]]
@@ -388,7 +388,7 @@ class KK(object):
         return score, raw, penalty
     
     @property
-    def D_k(self):
+    def D_k(self):#'vector of the number of different clusters returned by each run of local KK'
         return self.data.Dk
     
     @property
@@ -491,7 +491,6 @@ class KK(object):
                     max_iter = self.max_iterations
 
                 K2 = self.subset(spikes_in_cluster, name='split_candidate',
-                                 use_noise_cluster=False, use_mua_cluster=False,
                                  max_iterations=max_iter,
                                  map_log_to_debug=True,
                                  )
