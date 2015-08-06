@@ -1,8 +1,9 @@
 from numpy import *
 from numpy.random import randint
 import hashlib
-from hamming_maskstarts import hamming_maskstarts
-#import compute_penalty
+#from hamming_maskstarts import hamming_maskstarts
+from compute_penalty import compute_penalty
+from m_step import compute_cluster_bern
 # compute_cluster_bern
 from default_parameters import default_parameters
 import time
@@ -237,7 +238,7 @@ class KK(object):
 
 #            if num_changed==0 and last_step_full and not did_split:
 #                self.log('info', 'No points changed, previous step was full and did not split, '
-                                 'so finishing.')
+#                                 'so finishing.')
 #                break
 
             if num_changed<self.break_fraction*self.num_spikes:
@@ -296,19 +297,24 @@ class KK(object):
         clusters_to_kill = []
         
         bern = zeros(num_clusters, num_KKruns, max_Dk+1)
+        
+        ########### M step ########################################################
+        # Normalize by total number of points to give class weight
+        weights = (num_cluster_members)/denom
         for cluster in range(num_clusters):
 
-            ########### M step ########################################################
+            
         
-            # Normalize by total number of points to give class weight
+            
             #Shall we make this soft?
-            weight = (num_cluster_members[cluster])/denom
+            
         
             # Compute the generalized Bernoulli parameters for each cluster
             # cluster_bern has shape (max_possible_clusters, D, num_KKruns)
             # Note that we do this densely at the moment, might want to switch
             # that to a sparse structure later
-            cluster_bern = compute_cluster_bern(self, cluster, max_Dk)        
+            cluster_bern = compute_cluster_bern(self, cluster, max_Dk) 
+            bern[cluster,:,:] = cluster_bern     
             # Compute generalized Bernoulli parameters for each cluster
             compute_gener_bernoulli(self, cluster, cluster_mean)
             

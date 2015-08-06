@@ -11,7 +11,7 @@ def compute_cluster_bern(kk,cluster,max_Dk):
     spikes = kk.get_spikes_in_cluster(cluster)
     num_spikes_in_cluster = len(spikes)
     #bern
-    cluster_bern = np.zeros((num_kkruns, max_Dk), dtype = np.float32 )
+    cluster_bern = np.zeros((num_kkruns, max_Dk+1), dtype = np.float32 )
     cluster_bern[:,0] = num_spikes_in_cluster #Initialise by setting 
     #everything to the zero cluster
     
@@ -19,7 +19,6 @@ def compute_cluster_bern(kk,cluster,max_Dk):
         p = spikes[pp]
         #dims = supersparsekks[super_start[p]:super_end[p]][:,0]  = array([0, 2, 3, 4, 5, 6])
         #spclust = supersparsekks[super_start[p]:super_end[p]][:,1]  = array([ 3,  1,  1, 56, 13,  1])
-        cluster_bern[dims,spclust] = 
         num_nontrivial = super_end[p]-super_start[p] #dims where a KKrun took place
         for i in range(num_nontrivial):
             k = supersparsekks[super_start[p]+i,0]
