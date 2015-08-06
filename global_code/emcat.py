@@ -79,6 +79,7 @@ class KK(object):
         self.data = data
         self.cluster_hashes = set()
         self.is_copy = is_copy
+        self.map_log_to_debug = map_log_to_debug
         # user parameters
         show_params = name=='' and not is_copy
         self.params = params
