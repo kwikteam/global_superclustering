@@ -21,7 +21,7 @@ script_params = default_parameters.copy()
 #        debug=True,
 #        )
 
-picklefile = '/home/skadir/globalphy/nicktest/nick_global_320001_supercluster.p'
+picklefile = '/home/skadir/globalphy/nicktest/nick_global_40001_supercluster.p'
 pkl_file = open(picklefile,'rb')
 [time_taken_parallel, full_adjacency, channel_order_dict,globalcl_dict,supercluster_info,supercluster_results, superclusters] = pickle.load(pkl_file)
 pkl_file.close()  
@@ -37,4 +37,7 @@ print('Time taken for clump clustering %.2f s' %(time_taken_clump))
 
 kk = KK(superdata,**script_params)
 kk.cluster_from(clust100)
+
+#Automatically create clust100 via
+#kk.cluster_hammingmask_starts(100)
 embed()
