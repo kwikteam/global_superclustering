@@ -27,7 +27,12 @@ def sparsify_superclusters(superclusters):
         curoff += len(inds)    
     offsets[-1] = curoff    #final value of offsets
     
-    return GlobalSparseData(sparse_all_KKs, sparse_all_indices, offsets, num_KKs)
+    D_k = np.amax(superclusters, axis = 0) 
+    #Number of clusters in the kth KK run
+    #this assumes that the cluster labels are monotonic,
+    # i.e. no gaps 0, 1, 2, ..., D(k)
+    
+    return GlobalSparseData(sparse_all_KKs, sparse_all_indices, offsets, num_KKs, D_k)
 
 def reduce_supermasks_from_arrays(Ostart, Oend, I, K):
     #Ostart = silly.offsets[:-1]
@@ -110,11 +115,12 @@ class GlobalSparseData(object):
     '''Sparse data for global superclustering'''
     def __init__(self,
                 sparse_all_KKs, sparse_all_indices, 
-                 offsets, numKKs):
+                 offsets, numKKs, D_k):
         self.sparse_all_KKs = sparse_all_KKs
         self.sparse_all_indices = sparse_all_indices
         self.offsets = offsets
         self.numKKs = numKKs
+        self.D_k = D_k
 
     def to_sparse_data(self):
         values_start = self.offsets[:-1]

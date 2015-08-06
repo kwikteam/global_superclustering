@@ -133,9 +133,10 @@ class KK(object):
         self.old_clusters = -1*ones(len(self.clusters), dtype=int)
         self.reindex_clusters()  
 
-    def cluster_hammingmask_starts(self):
+    def cluster_hammingmask_starts(self,):
         '''Start from hamming sorted set of clusters'''
-        clusters = hammingmask_starts(self.data, self.num_starting_clusters, self.num_special_clusters)
+        clusters = hammingmask_starts(self.data, self.num_starting_clusters)
+        #clump_fine_clustering
         self.cluster_from(clusters)
 
     def cluster_from(self, clusters, recurse=True, score_target=-inf):
@@ -391,7 +392,7 @@ class KK(object):
     
     @property
     def D_k(self):#'vector of the number of different clusters returned by each run of local KK'
-        return self.data.Dk
+        return self.data.D_k
     
     @property
     def num_spikes(self):
@@ -420,7 +421,7 @@ class KK(object):
         '''
         num_cluster_members = array(bincount(self.clusters), dtype=int)
         I = num_cluster_members>0
-        I[0:self.num_special_clusters] = True # we keep special clusters
+        #I[0:self.num_special_clusters] = True # we keep special clusters
         remapping = hstack((0, cumsum(I)))[:-1]
         self.clusters = remapping[self.clusters]
         total_clusters = sum(I)
@@ -444,8 +445,8 @@ class KK(object):
         I = array(argsort(clusters), dtype=int)
         y = clusters[I]
         n = amax(y)
-        if n<self.num_special_clusters-1:
-            n = self.num_special_clusters-1
+      #  if n<self.num_special_clusters-1:
+      #      n = self.num_special_clusters-1
         n += 2
         J = searchsorted(y, arange(n))
         if assign_to_self:
