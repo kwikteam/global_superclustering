@@ -7,7 +7,7 @@ from klustakwik2 import *
 #import hashutils
 import numpy as np
 import pickle
-import tables as tb
+#import tables as tb
 import sys
 import os
 import copy
