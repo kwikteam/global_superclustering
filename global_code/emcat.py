@@ -57,9 +57,7 @@ def add_slots(meth):
 class KK(object):
     '''
     Main object used for clustering the supercluster points
-
-    * kk.num_special_clusters: the number of special clusters. This is also the cluster index of the
-      first normal cluster.
+    * data = supercluster data
     * Initialisation KK(data,  **params)
     * Method kk.cluster_mask_starts(num_starting_clusters) will cluster from mask starts.
     * Method kk.cluster_from(clusters) will cluster from the given array of cluster assignments.
@@ -268,6 +266,7 @@ class KK(object):
         num_cluster_members = self.num_cluster_members
         cluster_start = self.num_special_clusters
         num_spikes = self.num_spikes
+        max_Dk = amax(self.D_k)
 
         # Weight computations \pi_c
         denom = self.num_spikes
@@ -296,6 +295,7 @@ class KK(object):
         
         clusters_to_kill = []
         
+        bern = zeros(num_clusters, num_KKruns, max_Dk+1)
         for cluster in range(num_clusters):
 
             ########### M step ########################################################
@@ -308,7 +308,7 @@ class KK(object):
             # cluster_bern has shape (max_possible_clusters, D, num_KKruns)
             # Note that we do this densely at the moment, might want to switch
             # that to a sparse structure later
-            cluster_bern = compute_cluster_bern(self, cluster)        
+            cluster_bern = compute_cluster_bern(self, cluster, max_Dk)        
             # Compute generalized Bernoulli parameters for each cluster
             compute_gener_bernoulli(self, cluster, cluster_mean)
             
