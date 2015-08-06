@@ -70,7 +70,7 @@ class KK(object):
       defined additional arguments and keyword arguments.
     '''
     def __init__(self, data, callbacks=None, name = '',
-                 is_copy=False, **params):
+                 is_copy=False, map_log_to_debug=False, **params):
         
         self.name = name
         if callbacks is None:
