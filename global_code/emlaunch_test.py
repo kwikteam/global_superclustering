@@ -34,7 +34,7 @@ start_time = time.time()
 [clust100, dic100] = superdata.clump_fine_clustering(100)
 time_taken_clump = time.time()-start_time
 print('Time taken for clump clustering %.2f s' %(time_taken_clump))
-
+embed()
 kk = KK(superdata,**script_params)
 kk.cluster_from(clust100)
 

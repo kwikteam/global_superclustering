@@ -329,7 +329,7 @@ class KK(object):
             self.run_callbacks('e_step_before_main_loop',  cluster=cluster,
                                )
                 
-            compute_log_p_and_assign(self, cluster, weight, self.num_cpus, only_evaluate_current_clusters)
+            #compute_log_p_and_assign(self, cluster, weight, self.num_cpus, only_evaluate_current_clusters)
             
             self.run_callbacks('e_step_after_main_loop')
 
