@@ -301,7 +301,7 @@ class KK(object):
         
         clusters_to_kill = []
         
-        bern = zeros((num_clusters, num_KKruns, max_Dk_size), dtype = float32)
+        log_bern = zeros((num_clusters, num_KKruns, max_Dk_size), dtype = float32)
         prelogresponsibility = zeros((num_clusters, num_spikes), dtype = float32)
         ########### M step ########################################################
         # Normalize by total number of points to give class weight
