@@ -29,20 +29,89 @@ def compute_cluster_sublogresponsibility(kk, cluster, weights, log_cluster_bern)
         #for k in np.arange(num_kkruns):
            # if k not in nonzero_kkruns:
             #   # print('k = ',k)
-        for k in zero_kkruns:    
+        clust_sublogresponsibility[p] += sum(log_cluster_bern[zero_kkruns,0])    
+        #for k in zero_kkruns:    
             #print(k)
-            clust_sublogresponsibility[p] += log_cluster_bern[k,0]
-        num_nontrivial = super_end[p]-super_start[p]
-        for i in np.arange(num_nontrivial):
-            kkrun = supersparsekks[super_start[p]+i,0]
-            dlocal = supersparsekks[super_start[p]+i,1]
+        #    clust_sublogresponsibility[p] += log_cluster_bern[k,0]
+        clust_sublogresponsibility[p] += sum(log_cluster_bern[supersparsekks[super_start[p]:super_end[p],0],supersparsekks[super_start[p]:super_end[p],1]])
+        #num_nontrivial = super_end[p]-super_start[p]
+        #for i in np.arange(num_nontrivial):
+            #kkrun = supersparsekks[super_start[p]+i,0]
+            #dlocal = supersparsekks[super_start[p]+i,1]
             #print(kkrun)
             #print('cluster_bern [%g,%g] = '%(kkrun, dlocal), cluster_bern[kkrun, dlocal])
-            clust_sublogresponsibility[p] += log_cluster_bern[kkrun, dlocal]
+            #clust_sublogresponsibility[p] += log_cluster_bern[kkrun, dlocal]
     time_taken = time.time()-start_time
     print('Time taken for computing clust_sublogresponsibility %.2f s' %(time_taken))
     
     print('clust_sublogresponsibility for cluster %g'%(cluster), clust_sublogresponsibility)
     return clust_sublogresponsibility        
 
-#def compute_responsibilities(kk, cluster, weights, bern):
+#def assign_and_compute_log_p(kk, cluster, weight, prelogresponsibility, 
+                             #only_evaluate_current_clusters):
+    #num_clusters = len(kk.num_cluster_members)
+    #num_kkruns = kk.num_KKruns
+    #num_spikes = kk.num_spikes
+
+    #data = kk.data
+    #supersparsekks = data.supersparsekks
+    #super_start = data.super_start
+    #super_end = data.super_end
+
+    
+
+
+    #log_p_best = kk.log_p_best
+    #log_p_second_best = kk.log_p_second_best
+    
+    #clusters = kk.clusters
+    #clusters_second_best = kk.clusters_second_best
+    #old_clusters = kk.old_clusters
+    #full_step = kk.full_step
+
+   
+    #cluster_log_p = numpy.zeros(num_spikes)
+
+    #if only_evaluate_current_clusters:
+        #candidates = kk.quick_step_candidates[cluster]
+        #num_spikes = len(candidates)
+    #elif full_step:
+        #candidates = zeros(0, dtype=int)
+    #else:
+        #candidates = kk.quick_step_candidates[cluster]
+        #num_spikes = len(candidates)
+
+    #do_log_p_assign_computations(
+                                  
+                                  #log_p_best, log_p_second_best,
+                                  #clusters, clusters_second_best, old_clusters,
+                                  
+                                  #num_, num_spikes, log_addition, cluster,
+                                  #chol.block, chol.diagonal, chol.masked, chol.unmasked,
+                                  #n_cpu,
+                                  #cluster_log_p,
+                                  #candidates,
+                                  #only_evaluate_current_clusters,
+                                  #)
+
+    #if only_evaluate_current_clusters:
+        #kk.log_p_best[candidates] = cluster_log_p[candidates]
+    #elif kk.collect_candidates and hasattr(kk, 'old_log_p_best'):
+        #max_quick_step_candidates = min(kk.max_quick_step_candidates,
+            #kk.max_quick_step_candidates_fraction*kk.num_spikes*kk.num_clusters_alive)
+        #candidates, = (cluster_log_p-kk.old_log_p_best<=kk.dist_thresh).nonzero()
+        #kk.quick_step_candidates[cluster] = array(candidates, dtype=int)
+        #num_candidates = sum(len(v) for v in itervalues(kk.quick_step_candidates))
+        #if num_candidates>max_quick_step_candidates:
+            #kk.collect_candidates = False
+            #kk.quick_step_candidates.clear()
+            #kk.force_next_step_full = True
+            #if num_candidates>kk.max_quick_step_candidates:
+                #kk.log('info', 'Ran out of storage space for quick step, try increasing '
+                               #'max_quick_step_candidates if this happens often.')
+            #else:
+                #kk.log('debug', 'Exceeded quick step point fraction, next step '
+                                #'will be full')
+
+    #return kk.num_spikes-num_spikes
+##def compute_responsibilities(kk, cluster, weights, bern):
