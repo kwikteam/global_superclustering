@@ -6,6 +6,7 @@ from logger import log_message
 #from hamming_maskstarts import hamming_maskstarts
 from compute_penalty import compute_penalty
 from m_step import compute_cluster_bern
+#from e_step import compute_log_p_and_assign
 # compute_cluster_bern
 from default_parameters import default_parameters
 import time
@@ -320,19 +321,19 @@ class KK(object):
             cluster_bern = compute_cluster_bern(self, cluster, max_Dk) 
             print(cluster_bern)
             bern[cluster,:,:] = cluster_bern     
-            embed()
+            #embed()
             # Compute generalized Bernoulli parameters for each cluster
             #compute_gener_bernoulli(self, cluster, cluster_mean)
             
-            ########### EC steps ######################################################
+        ########### EC steps ######################################################
            
-            self.run_callbacks('e_step_before_main_loop',  cluster=cluster,
+        self.run_callbacks('e_step_before_main_loop',  cluster=cluster,
                                )
                 
-            #compute_log_p_and_assign(self, cluster, weight, self.num_cpus, only_evaluate_current_clusters)
+        #compute_log_p_and_assign(self, weights, bern, only_evaluate_current_clusters)
             
-            self.run_callbacks('e_step_after_main_loop')
-
+        self.run_callbacks('e_step_after_main_loop')
+        embed()
         # we've reassigned clusters so we need to recompute the partitions, but we don't want to
         # reindex yet because we may reassign points to different clusters and we need the original
         # cluster numbers for that
@@ -341,7 +342,7 @@ class KK(object):
     @add_slots
     def compute_penalty(self, clusters=None):
         penalty = compute_penalty(self, clusters)
-        return penalties
+        return penalty
 
     @add_slots
     def consider_deletion(self):
