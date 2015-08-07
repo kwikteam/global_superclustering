@@ -9,6 +9,7 @@ from m_step import compute_cluster_bern
 # compute_cluster_bern
 from default_parameters import default_parameters
 import time
+from IPython import embed
 
 class PartitionError(Exception):
     pass
@@ -319,8 +320,9 @@ class KK(object):
             cluster_bern = compute_cluster_bern(self, cluster, max_Dk) 
             print(cluster_bern)
             bern[cluster,:,:] = cluster_bern     
+            embed()
             # Compute generalized Bernoulli parameters for each cluster
-            compute_gener_bernoulli(self, cluster, cluster_mean)
+            #compute_gener_bernoulli(self, cluster, cluster_mean)
             
             ########### EC steps ######################################################
            
