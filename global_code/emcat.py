@@ -268,7 +268,7 @@ class KK(object):
         num_clusters = self.num_clusters_alive
         num_KKruns = self.num_KKruns
         num_cluster_members = self.num_cluster_members
-        cluster_start = self.num_special_clusters
+        cluster_start = 0
         num_spikes = self.num_spikes
         max_Dk = amax(self.D_k)
 
