@@ -5,7 +5,7 @@ from six import iteritems
 from logger import log_message
 #from hamming_maskstarts import hamming_maskstarts
 from compute_penalty import compute_penalty
-from m_step import compute_cluster_bern
+from m_step import compute_cluster_bern_non
 from e_step import compute_cluster_sublogresponsibility
 # compute_cluster_bern
 from default_parameters import default_parameters
@@ -318,15 +318,18 @@ class KK(object):
             # cluster_bern has shape (max_possible_clusters, D, num_KKruns)
             # Note that we do this densely at the moment, might want to switch
             # that to a sparse structure later
-            cluster_bern = compute_cluster_bern(self, cluster, max_Dk) 
+            cluster_bern = compute_cluster_bern_non(self, cluster, max_Dk) 
            # print(cluster_bern)
-            bern[cluster,:,:] = cluster_bern     
+            log_cluster_bern = log(cluster_bern) 
+            log_bern[cluster,:,:] = log_cluster_bern     
             #embed()
             # Compute generalized Bernoulli parameters for each cluster
             #compute_gener_bernoulli(self, cluster, cluster_mean)
-            
+        #embed()
+        #for cluster in range(num_clusters):
             ########### EC steps ######################################################
-            clustsublogresp = compute_cluster_sublogresponsibility(self, cluster, weights, cluster_bern)  
+            
+            clustsublogresp = compute_cluster_sublogresponsibility(self, cluster, weights, log_cluster_bern)  
             prelogresponsibility[cluster, :] = clustsublogresp
         
         #responsibility = sum(prelogresponsibility, axis = 0)
