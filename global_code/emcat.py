@@ -302,7 +302,7 @@ class KK(object):
         clusters_to_kill = []
         
         bern = zeros((num_clusters, num_KKruns, max_Dk_size), dtype = float32)
-        
+        preresponsibility = zeros((num_clusters, num_spikes), dtype = float32)
         ########### M step ########################################################
         # Normalize by total number of points to give class weight
         weights = (num_cluster_members)/denom
@@ -325,10 +325,12 @@ class KK(object):
             # Compute generalized Bernoulli parameters for each cluster
             #compute_gener_bernoulli(self, cluster, cluster_mean)
             
-        ########### EC steps ######################################################
-           
+            ########### EC steps ######################################################
+            clustsubresp = compute_cluster_subresponsibility(self, cluster, weights, cluster_bern)  
+            preresponsibility[cluster, :] = clustsubresp
+            
         self.run_callbacks('e_step_before_main_loop',  cluster=cluster,
-                               )
+                          )
                 
         #compute_log_p_and_assign(self, weights, bern, only_evaluate_current_clusters)
             
