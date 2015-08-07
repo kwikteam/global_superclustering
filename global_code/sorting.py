@@ -173,7 +173,7 @@ class GlobalSparseData(object):
         cand_cluster_label = {startid:cluster_label for cluster_label, startid in enumerate(candidate_ids_start)}   
         #print(cand_cluster_label)
         clump_clustering(clusters, candidate_ids_start, candidate_ids_end, self.supersparsekks, self.super_start, self.super_end,
-                        allspikes, self.numKKs, cand_cluster_label)
+                        allspikes, self.num_KKruns, cand_cluster_label)
         return clusters, cand_cluster_label    
 
        
