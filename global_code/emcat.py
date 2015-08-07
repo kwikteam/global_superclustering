@@ -294,8 +294,7 @@ class KK(object):
         num_skipped = 0
         
         if not only_evaluate_current_clusters:
-            self.clusters[:] = self.noise_cluster
-            self.log_p_best[:] = -log(noise_weight)
+            self.log_p_best[:] = 0
         
         clusters_to_kill = []
         
