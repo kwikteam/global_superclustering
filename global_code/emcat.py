@@ -2,6 +2,7 @@ from numpy import *
 from numpy.random import randint
 import hashlib
 from six import iteritems
+from logger import log_message
 #from hamming_maskstarts import hamming_maskstarts
 from compute_penalty import compute_penalty
 from m_step import compute_cluster_bern
