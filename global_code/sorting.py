@@ -119,7 +119,7 @@ class GlobalSparseData(object):
         self.sparse_all_KKs = sparse_all_KKs
         self.sparse_all_indices = sparse_all_indices
         self.offsets = offsets
-        self.numKKs = numKKs
+        self.num_KKruns = numKKs
         self.D_k = D_k
 
     def to_sparse_data(self):
