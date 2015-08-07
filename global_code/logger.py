@@ -11,7 +11,7 @@ __all__ = ['logger', 'log_to_file', 'file_log_level', 'console_log_level', 'log_
            'log_suppress_hierarchy', 'log_suppress_name', 'log_remove_filters',
            ]
 
-logger = logging.getLogger('klustakwik')
+logger = logging.getLogger('global_superclustering')
 logger.propagate = False
 logger.setLevel(logging.DEBUG)
 
@@ -58,9 +58,9 @@ def log_message(level, msg, name=None):
     if isinstance(level, str):
         level = LOG_LEVELS[level.upper()]
     if name is None or name=='':
-        name = 'klustakwik'
+        name = 'global_superclustering'
     else:
-        name = 'klustakwik.'+name
+        name = 'global_superclustering.'+name
     logger = logging.getLogger(name)
     logger.log(level, msg)
 
