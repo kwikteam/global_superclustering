@@ -257,7 +257,7 @@ class KK(object):
         return score
     
     @add_slots
-    def MEC_steps(self):
+    def MEC_steps(self, only_evaluate_current_clusters=False):
         # eliminate any clusters with 0 members, compute the list of spikes
         # in each cluster, compute the weights and generalized Bernoulli
         #parameters 
@@ -317,6 +317,7 @@ class KK(object):
             # Note that we do this densely at the moment, might want to switch
             # that to a sparse structure later
             cluster_bern = compute_cluster_bern(self, cluster, max_Dk) 
+            print(cluster_bern)
             bern[cluster,:,:] = cluster_bern     
             # Compute generalized Bernoulli parameters for each cluster
             compute_gener_bernoulli(self, cluster, cluster_mean)
