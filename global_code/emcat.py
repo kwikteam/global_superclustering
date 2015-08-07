@@ -271,6 +271,7 @@ class KK(object):
         cluster_start = 0
         num_spikes = self.num_spikes
         max_Dk = amax(self.D_k)
+        max_Dk_size = max_Dk + 1
 
         # Weight computations \pi_c
         denom = self.num_spikes
@@ -298,7 +299,7 @@ class KK(object):
         
         clusters_to_kill = []
         
-        bern = zeros(num_clusters, num_KKruns, max_Dk+1)
+        bern = zeros(num_clusters, num_KKruns, max_Dk_size)
         
         ########### M step ########################################################
         # Normalize by total number of points to give class weight
