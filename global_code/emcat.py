@@ -301,7 +301,7 @@ class KK(object):
         
         clusters_to_kill = []
         
-        bern = zeros((num_clusters, num_KKruns, max_Dk_size), dtype = int)
+        bern = zeros((num_clusters, num_KKruns, max_Dk_size), dtype = float)
         log_bern = zeros((num_clusters, num_KKruns, max_Dk_size), dtype = float)
         prelogresponsibility = zeros((num_clusters, num_spikes), dtype = float)
         preresponsibility = zeros((num_clusters, num_spikes), dtype = float)
