@@ -5,8 +5,8 @@ from six import iteritems
 from logger import log_message
 #from hamming_maskstarts import hamming_maskstarts
 from compute_penalty import compute_penalty
-from m_step import compute_cluster_bern_non
-from e_step import compute_cluster_sublogresponsibility
+from m_step import compute_cluster_bern
+from e_step import compute_cluster_subresponsibility
 # compute_cluster_bern
 from default_parameters import default_parameters
 import time
@@ -301,8 +301,10 @@ class KK(object):
         
         clusters_to_kill = []
         
-        log_bern = zeros((num_clusters, num_KKruns, max_Dk_size), dtype = float32)
-        prelogresponsibility = zeros((num_clusters, num_spikes), dtype = float32)
+        bern = zeros((num_clusters, num_KKruns, max_Dk_size), dtype = int)
+        log_bern = zeros((num_clusters, num_KKruns, max_Dk_size), dtype = float)
+        prelogresponsibility = zeros((num_clusters, num_spikes), dtype = float)
+        preresponsibility = zeros((num_clusters, num_spikes), dtype = float)
         ########### M step ########################################################
         # Normalize by total number of points to give class weight
         weights = (num_cluster_members)/denom
@@ -318,8 +320,9 @@ class KK(object):
             # cluster_bern has shape (max_possible_clusters, D, num_KKruns)
             # Note that we do this densely at the moment, might want to switch
             # that to a sparse structure later
-            cluster_bern = compute_cluster_bern_non(self, cluster, max_Dk) 
+            [cluster_bern, cluster_bern_norm] = compute_cluster_bern(self, cluster, max_Dk) 
            # print(cluster_bern)
+            bern[cluster, :, :] = cluster_bern_norm
             log_cluster_bern = log(cluster_bern) 
             log_bern[cluster,:,:] = log_cluster_bern     
             #embed()
@@ -329,7 +332,8 @@ class KK(object):
         #for cluster in range(num_clusters):
             ########### EC steps ######################################################
             
-            clustsublogresp = compute_cluster_sublogresponsibility(self, cluster, weights, log_cluster_bern)  
+            clustsublogresp, clustsubresp = compute_cluster_subresponsibility(self, cluster, weights, log_cluster_bern)  
+            preresponsibility[cluster, :] = clustsubresp
             prelogresponsibility[cluster, :] = clustsublogresp
         
         #responsibility = sum(prelogresponsibility, axis = 0)

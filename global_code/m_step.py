@@ -1,6 +1,6 @@
 import numpy as np
 
-def compute_cluster_bern_non(kk,cluster,max_Dk):
+def compute_cluster_bern(kk,cluster,max_Dk):
     data = kk.data
     supersparsekks = data.supersparsekks
     super_start = data.super_start
@@ -25,8 +25,8 @@ def compute_cluster_bern_non(kk,cluster,max_Dk):
             d = supersparsekks[super_start[p]+i,1]
             cluster_bern[k,d] = 1
             cluster_bern[k,0] += -1
-    #cluster_bern /= num_spikes_in_cluster
-    return cluster_bern  
+    cluster_bern_norm /= num_spikes_in_cluster
+    return cluster_bern, cluster_bern_norm 
             
     
      

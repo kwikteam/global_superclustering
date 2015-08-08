@@ -3,7 +3,7 @@ import time
 #from e_step_cy import *
 #find_sublogresponsibility
 
-def compute_cluster_sublogresponsibility(kk, cluster, weights, log_cluster_bern):
+def compute_cluster_subresponsibility(kk, cluster, weights, cluster_bern, log_cluster_bern):
     '''compute the numerator of the responsibilities
        bern[cluster, KKrun, localclust] '''
     data = kk.data
@@ -16,24 +16,24 @@ def compute_cluster_sublogresponsibility(kk, cluster, weights, log_cluster_bern)
     spikes = kk.get_spikes_in_cluster(cluster)
     num_spikes_in_cluster = len(spikes)
     
+    clust_subresponsibility = np.zeros(num_spikes,filler)
     filler = np.log(weights[cluster])- num_kkruns*np.log(num_spikes_in_cluster)
     clust_sublogresponsibility = np.full(num_spikes,filler)
     print(filler)
     start_time = time.time()
-    for p in np.arange(num_spikes):
-        #find_sublogresponsibility(clust_sublogresponsibility,cluster_bern,supersparsekks, super_start, super_end, num_spikes,num_kkruns)
-        
+    for p in np.arange(num_spikes):        
         nonzero_kkruns = supersparsekks[super_start[p]:super_end[p],0]
         prezero_kkruns = np.arange(num_kkruns)
         zero_kkruns = np.delete(prezero_kkruns, nonzero_kkruns)
+        clust_sublogresponsibility[p] += sum(log_cluster_bern[zero_kkruns,0])   
+        clust_sublogresponsibility[p] += sum(log_cluster_bern[supersparsekks[super_start[p]:super_end[p],0],supersparsekks[super_start[p]:super_end[p],1]])
+        clust_subresponsibility[p] *= prod(cluster_bern[zero_kkruns,0])   
+        clust_subresponsibility[p] *= prod(cluster_bern[supersparsekks[super_start[p]:super_end[p],0],supersparsekks[super_start[p]:super_end[p],1]])
+        #find_sublogresponsibility(clust_sublogresponsibility,cluster_bern,supersparsekks, super_start, super_end, num_spikes,num_kkruns)
         #for k in np.arange(num_kkruns):
            # if k not in nonzero_kkruns:
-            #   # print('k = ',k)
-        clust_sublogresponsibility[p] += sum(log_cluster_bern[zero_kkruns,0])    
         #for k in zero_kkruns:    
-            #print(k)
         #    clust_sublogresponsibility[p] += log_cluster_bern[k,0]
-        clust_sublogresponsibility[p] += sum(log_cluster_bern[supersparsekks[super_start[p]:super_end[p],0],supersparsekks[super_start[p]:super_end[p],1]])
         #num_nontrivial = super_end[p]-super_start[p]
         #for i in np.arange(num_nontrivial):
             #kkrun = supersparsekks[super_start[p]+i,0]
@@ -45,30 +45,27 @@ def compute_cluster_sublogresponsibility(kk, cluster, weights, log_cluster_bern)
     print('Time taken for computing clust_sublogresponsibility %.2f s' %(time_taken))
     
     print('clust_sublogresponsibility for cluster %g'%(cluster), clust_sublogresponsibility)
-    return clust_sublogresponsibility        
+    print('clust_subresponsibility for cluster %g'%(cluster), clust_subresponsibility)
+    return clust_sublogresponsibility, clust_subresponsibility      
 
-#def assign_and_compute_log_p(kk, cluster, weight, prelogresponsibility, 
-                             #only_evaluate_current_clusters):
-    #num_clusters = len(kk.num_cluster_members)
-    #num_kkruns = kk.num_KKruns
-    #num_spikes = kk.num_spikes
+def assign_and_cluster(kk, prelogresponsibility, 
+                             only_evaluate_current_clusters):
+    num_clusters = len(kk.num_cluster_members)
+    num_kkruns = kk.num_KKruns
+    num_spikes = kk.num_spikes
 
-    #data = kk.data
-    #supersparsekks = data.supersparsekks
-    #super_start = data.super_start
-    #super_end = data.super_end
+    data = kk.data
+    supersparsekks = data.supersparsekks
+    super_start = data.super_start
+    super_end = data.super_end
 
+    log_p_best = kk.log_p_best
+    log_p_second_best = kk.log_p_second_best
     
-
-
-    #log_p_best = kk.log_p_best
-    #log_p_second_best = kk.log_p_second_best
-    
-    #clusters = kk.clusters
-    #clusters_second_best = kk.clusters_second_best
-    #old_clusters = kk.old_clusters
+    clusters = kk.clusters
+    clusters_second_best = kk.clusters_second_best
+    old_clusters = kk.old_clusters
     #full_step = kk.full_step
-
    
     #cluster_log_p = numpy.zeros(num_spikes)
 
