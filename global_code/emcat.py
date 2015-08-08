@@ -302,6 +302,7 @@ class KK(object):
         clusters_to_kill = []
         
         bern = zeros((num_clusters, num_KKruns, max_Dk_size), dtype = float)
+        #unbern = zeros((num_clusters, num_KKruns, max_Dk_size), dtype = int)
         log_bern = zeros((num_clusters, num_KKruns, max_Dk_size), dtype = float)
         prelogresponsibility = zeros((num_clusters, num_spikes), dtype = float)
         preresponsibility = zeros((num_clusters, num_spikes), dtype = float)
@@ -320,10 +321,11 @@ class KK(object):
             # cluster_bern has shape (max_possible_clusters, D, num_KKruns)
             # Note that we do this densely at the moment, might want to switch
             # that to a sparse structure later
-            [cluster_bern, cluster_bern_norm] = compute_cluster_bern(self, cluster, max_Dk) 
+            [cluster_bern_int, cluster_bern_norm] = compute_cluster_bern(self, cluster, max_Dk) 
            # print(cluster_bern)
-            bern[cluster, :, :] = cluster_bern_norm
-            log_cluster_bern = log(cluster_bern) 
+            #unbern[cluster, :, :] = cluster_bern
+            bern[cluster, :, :] = cluster_bern_int
+            log_cluster_bern = log(cluster_bern_int) 
             log_bern[cluster,:,:] = log_cluster_bern     
             #embed()
             # Compute generalized Bernoulli parameters for each cluster
@@ -332,11 +334,14 @@ class KK(object):
         #for cluster in range(num_clusters):
             ########### EC steps ######################################################
             
-            clustsublogresp, clustsubresp = compute_cluster_subresponsibility(self, cluster, weights, cluster_bern_norm, log_cluster_bern)  
+            clustsublogresp, clustsubresp = compute_cluster_subresponsibility(self, cluster, weights, cluster_bern_int, log_cluster_bern)  
             preresponsibility[cluster, :] = clustsubresp
             prelogresponsibility[cluster, :] = clustsublogresp
+            
+            #unbern[cluster,:,:]=bern[cluster,:,:]*len(self.get_spikes_in_cluster(cluster))
         
-        #responsibility = sum(prelogresponsibility, axis = 0)
+        sumresponsibility = sum(preresponsibility, axis = 0)
+        responsibility = preresponsibility/sumresponsibility
         self.run_callbacks('e_step_before_main_loop',  cluster=cluster,
                           )
                 
