@@ -321,11 +321,11 @@ class KK(object):
             # cluster_bern has shape (max_possible_clusters, D, num_KKruns)
             # Note that we do this densely at the moment, might want to switch
             # that to a sparse structure later
-            [cluster_bern_int, cluster_bern_norm] = compute_cluster_bern(self, cluster, max_Dk) 
+            [cluster_bern, cluster_bern_norm] = compute_cluster_bern(self, cluster, max_Dk) 
            # print(cluster_bern)
             #unbern[cluster, :, :] = cluster_bern
-            bern[cluster, :, :] = cluster_bern_int
-            log_cluster_bern = log(cluster_bern_int) 
+            bern[cluster, :, :] = cluster_bern
+            log_cluster_bern = log(cluster_bern) 
             log_bern[cluster,:,:] = log_cluster_bern     
             #embed()
             # Compute generalized Bernoulli parameters for each cluster
@@ -334,14 +334,14 @@ class KK(object):
         #for cluster in range(num_clusters):
             ########### EC steps ######################################################
             
-            clustsublogresp, clustsubresp = compute_cluster_subresponsibility(self, cluster, weights, cluster_bern_int, log_cluster_bern)  
+            clustsublogresp, clustsubresp = compute_cluster_subresponsibility(self, cluster, weights, cluster_bern, log_cluster_bern)  
             preresponsibility[cluster, :] = clustsubresp
             prelogresponsibility[cluster, :] = clustsublogresp
             
             #unbern[cluster,:,:]=bern[cluster,:,:]*len(self.get_spikes_in_cluster(cluster))
         
-        sumresponsibility = sum(preresponsibility, axis = 0)
-        responsibility = preresponsibility/sumresponsibility
+        #sumresponsibility = sum(preresponsibility, axis = 0)
+        #responsibility = preresponsibility/sumresponsibility
         self.run_callbacks('e_step_before_main_loop',  cluster=cluster,
                           )
                 
