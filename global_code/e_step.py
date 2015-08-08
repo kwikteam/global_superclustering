@@ -13,7 +13,7 @@ def compute_cluster_subresponsibility(kk, cluster, weights, cluster_bern_int, lo
     
     num_kkruns = kk.num_KKruns
     num_spikes = kk.num_spikes
-    num_cluster_members = kk.self.num_cluster_members
+    num_cluster_members = kk.num_cluster_members
     spikes = kk.get_spikes_in_cluster(cluster)
     num_spikes_in_cluster = len(spikes) #equal to num_cluster_members[cluster]
     
