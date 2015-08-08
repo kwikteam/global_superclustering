@@ -16,7 +16,7 @@ def compute_cluster_subresponsibility(kk, cluster, weights, cluster_bern, log_cl
     spikes = kk.get_spikes_in_cluster(cluster)
     num_spikes_in_cluster = len(spikes)
     
-    clust_subresponsibility = np.zeros(num_spikes,filler)
+    clust_subresponsibility = np.zeros(num_spikes)
     filler = np.log(weights[cluster])- num_kkruns*np.log(num_spikes_in_cluster)
     clust_sublogresponsibility = np.full(num_spikes,filler)
     print(filler)
