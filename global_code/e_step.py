@@ -25,10 +25,10 @@ def compute_cluster_subresponsibility(kk, cluster, weights, cluster_bern, log_cl
         nonzero_kkruns = supersparsekks[super_start[p]:super_end[p],0]
         prezero_kkruns = np.arange(num_kkruns)
         zero_kkruns = np.delete(prezero_kkruns, nonzero_kkruns)
-        clust_sublogresponsibility[p] += sum(log_cluster_bern[zero_kkruns,0])   
-        clust_sublogresponsibility[p] += sum(log_cluster_bern[supersparsekks[super_start[p]:super_end[p],0],supersparsekks[super_start[p]:super_end[p],1]])
-        clust_subresponsibility[p] *= prod(cluster_bern[zero_kkruns,0])   
-        clust_subresponsibility[p] *= prod(cluster_bern[supersparsekks[super_start[p]:super_end[p],0],supersparsekks[super_start[p]:super_end[p],1]])
+        clust_sublogresponsibility[p] += np.sum(log_cluster_bern[zero_kkruns,0])   
+        clust_sublogresponsibility[p] += np.sum(log_cluster_bern[supersparsekks[super_start[p]:super_end[p],0],supersparsekks[super_start[p]:super_end[p],1]])
+        clust_subresponsibility[p] *= np.prod(cluster_bern[zero_kkruns,0])   
+        clust_subresponsibility[p] *= np.prod(cluster_bern[supersparsekks[super_start[p]:super_end[p],0],supersparsekks[super_start[p]:super_end[p],1]])
         #find_sublogresponsibility(clust_sublogresponsibility,cluster_bern,supersparsekks, super_start, super_end, num_spikes,num_kkruns)
         #for k in np.arange(num_kkruns):
            # if k not in nonzero_kkruns:
