@@ -334,7 +334,7 @@ class KK(object):
         #for cluster in range(num_clusters):
             ########### EC steps ######################################################
             
-            clustsublogresp, clustsubresp = compute_cluster_subresponsibility(self, cluster, weights, cluster_bern, log_cluster_bern)  
+            clustsublogresp, clustsubresp = compute_cluster_subresponsibility(self, cluster, weights, cluster_bern_norm, log_cluster_bern)  
             preresponsibility[cluster, :] = clustsubresp
             prelogresponsibility[cluster, :] = clustsublogresp
             
