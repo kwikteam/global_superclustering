@@ -11,6 +11,7 @@ def compute_cluster_bern(kk,cluster,max_Dk):
     spikes = kk.get_spikes_in_cluster(cluster)
     num_spikes_in_cluster = len(spikes)
     #bern
+    cluster_bern_norm = np.zeros((num_kkruns, max_Dk+1), dtype = np.float32 )
     cluster_bern = np.zeros((num_kkruns, max_Dk+1), dtype = np.float32 )
     cluster_bern[:,0] = num_spikes_in_cluster #Initialise by setting 
     #everything to the zero cluster
