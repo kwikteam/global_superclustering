@@ -68,16 +68,8 @@ def assign_and_cluster(kk, prelogresponsibility,
     #full_step = kk.full_step
    
     #cluster_log_p = numpy.zeros(num_spikes)
-
-    #if only_evaluate_current_clusters:
-        #candidates = kk.quick_step_candidates[cluster]
-        #num_spikes = len(candidates)
-    #elif full_step:
-        #candidates = zeros(0, dtype=int)
-    #else:
-        #candidates = kk.quick_step_candidates[cluster]
-        #num_spikes = len(candidates)
-
+    candidates = zeros(0, dtype=int)
+    
     #do_log_p_assign_computations(
                                   
                                   #log_p_best, log_p_second_best,

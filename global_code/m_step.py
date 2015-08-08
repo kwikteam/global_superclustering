@@ -24,7 +24,7 @@ def compute_cluster_bern(kk,cluster,max_Dk):
         for i in range(num_nontrivial):
             k = supersparsekks[super_start[p]+i,0]
             d = supersparsekks[super_start[p]+i,1]
-            cluster_bern[k,d] = 1
+            cluster_bern[k,d] += 1
             cluster_bern[k,0] += -1
     #cluster_bern_norm = cluster_bern        
     cluster_bern_norm = cluster_bern/num_spikes_in_cluster
