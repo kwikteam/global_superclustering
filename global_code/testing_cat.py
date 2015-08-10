@@ -67,5 +67,12 @@ if __name__ == "__main__":
     #print('Time taken for clump clustering %.2f s' %(time_taken_clump))
     #embed()
     script_params = default_parameters.copy()
+   
+    script_params.update(
+        consider_cluster_deletion = False,
+        
+        )
+    
+    
     kk = KK(sparsedata,**script_params)
     kk.cluster_from(init_clust)
