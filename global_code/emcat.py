@@ -4,7 +4,7 @@ import hashlib
 from six import iteritems
 from logger import log_message
 #from hamming_maskstarts import hamming_maskstarts
-#from compute_penalty import compute_penalty
+from compute_penalty import compute_penalty
 from m_step import compute_cluster_bern
 from e_step import compute_cluster_subresponsibility, compute_log_p_and_assign
 # compute_cluster_bern
@@ -165,8 +165,9 @@ class KK(object):
 
         while self.current_iteration<self.max_iterations:
             self.MEC_steps()
-            self.compute_penalty() 
             embed()
+            self.compute_penalty() 
+            #embed()
             if recurse and self.consider_cluster_deletion:
                 self.consider_deletion()
             old_score = score
@@ -360,7 +361,7 @@ class KK(object):
     def compute_penalty(self, clusters=None):
         penalty = compute_penalty(self, clusters)
         if clusters is None:
-	    self.penalty = penalty
+            self.penalty = penalty
         return penalty
 
     @add_slots
@@ -386,8 +387,8 @@ class KK(object):
             cursic = sic[sico[cluster]:sico[cluster+1]]
             new_clusters[cursic] = self.clusters_second_best[cursic]
             # compute penalties if we reassigned this
-#            penalties = self.compute_penalty(new_clusters)
-            new_score = score_raw+deletion_loss[cluster]#+sum(penalties)
+            new_penalty = self.compute_penalty(new_clusters)
+            new_score = score_raw+deletion_loss[cluster]+new_penalty
             cur_improvement = score-new_score # we want improvement to be a positive value
             if cur_improvement>improvement:
                 improvement = cur_improvement
@@ -418,7 +419,7 @@ class KK(object):
     def compute_score(self):
         #essential_params = self.num_clusters_alive*self.num_KKruns*(sum(self.D_k)-self.num_KKruns) #\sum_{k=1}^{num_KKruns} D(k)
         penalty = self.penalty
-        raw = sum(self.log_p_best)
+        raw = -2*sum(self.log_p_best) #Check this factor AIC = 2k-2log(L)
         score = raw+penalty
         self.log('debug', 'compute_score: raw %f + penalty %f = %f' % (raw, penalty, score))
         return score, raw, penalty
