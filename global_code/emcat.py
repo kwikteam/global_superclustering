@@ -6,7 +6,7 @@ from logger import log_message
 #from hamming_maskstarts import hamming_maskstarts
 from compute_penalty import compute_penalty
 from m_step import compute_cluster_bern
-from e_step import compute_cluster_subresponsibility, compute_log_p_and_assign
+from e_step import compute_cluster_subresponsibility
 # compute_cluster_bern
 from default_parameters import default_parameters
 import time
@@ -131,6 +131,19 @@ class KK(object):
                   callbacks=self.callbacks,
                   is_copy=True,
                   **params)
+
+    def subset(self, spikes, name='kk_subset', **additional_params):
+            newdata = self.data.subset(spikes)
+            if self.name:
+                sep = '.'
+            else:
+                sep = ''
+            params = self.params.copy()
+            params.update(**additional_params)
+            return KK(newdata, name=self.name+sep+name,
+                      callbacks=self.callbacks,
+                      is_subset=True,
+                      **params)               
  
     def initialise_clusters(self, clusters):
         self.clusters = clusters
@@ -165,9 +178,7 @@ class KK(object):
 
         while self.current_iteration<self.max_iterations:
             self.MEC_steps()
-            #embed()
             self.compute_penalty() 
-            #embed()
             if recurse and self.consider_cluster_deletion:
                 self.consider_deletion()
             old_score = score
@@ -193,14 +204,13 @@ class KK(object):
                                                                          self.num_clusters_alive,
                                                                          num_changed, score)
 
-            #last_step_full = self.full_step
-            #self.full_step = (num_changed>self.num_changed_threshold*self.num_spikes or
-            #                  num_changed==0 or
-            #                  self.current_iteration % self.full_step_every == 0 or
-            #                  (old_score is not None and score > old_score))
-           # if not hasattr(self, 'old_log_p_best'):
-            #    self.full_step = True 
-            # We are no longer concerned about whether or not steps are full
+            last_step_full = self.full_step
+            self.full_step = (num_changed>self.num_changed_threshold*self.num_spikes or
+                              num_changed==0 or
+                              self.current_iteration % self.full_step_every == 0 or
+                              (old_score is not None and score > old_score))
+            if not hasattr(self, 'old_log_p_best'):
+                self.full_step = True
 
             self.reindex_clusters()
 
@@ -215,8 +225,8 @@ class KK(object):
 
             # Splitting logic
             iterations_until_next_split -= 1
-            if num_changed==0:
-                self.log('info', 'No points changed, so trying to split.')
+            if num_changed==0 and last_step_full:
+                self.log('info', 'No points changed and last step was full, so trying to split.')
                 iterations_until_next_split = 0
 
             # Cycle detection/breaking
@@ -244,10 +254,10 @@ class KK(object):
 
             self.run_callbacks('end_iteration')
 
-            if num_changed==0 and not did_split:
-                self.log('info', 'No points changed, previous step was full and did not split, '
-                                 'so finishing.')
-                break
+#            if num_changed==0 and last_step_full and not did_split:
+#                self.log('info', 'No points changed, previous step was full and did not split, '
+#                                 'so finishing.')
+#                break
 
             if num_changed<self.break_fraction*self.num_spikes:
                 self.log('info', 'Number of points changed below break fraction, so finishing.')
@@ -299,8 +309,14 @@ class KK(object):
 
         num_skipped = 0
         
-        if not only_evaluate_current_clusters:
-            self.log_p_best[:] = 0
+        if only_evaluate_current_clusters:
+            self.collect_candidates = False
+        elif self.full_step:
+            self.collect_candidates = True
+        
+        
+        #if not only_evaluate_current_clusters:
+        #    self.log_p_best[:] = 0
         
         clusters_to_kill = []
         
@@ -308,7 +324,7 @@ class KK(object):
         #unbern = zeros((num_clusters, num_KKruns, max_Dk_size), dtype = int)
         log_bern = zeros((num_clusters, num_KKruns, max_Dk_size), dtype = float)
         prelogresponsibility = zeros((num_clusters, num_spikes), dtype = float)
-        #preresponsibility = zeros((num_clusters, num_spikes), dtype = float)
+        preresponsibility = zeros((num_clusters, num_spikes), dtype = float)
         ########### M step ########################################################
         # Normalize by total number of points to give class weight
         weights = (num_cluster_members)/denom
@@ -337,9 +353,8 @@ class KK(object):
         #for cluster in range(num_clusters):
             ########### EC steps ######################################################
             
-            #clustsublogresp, clustsubresp = compute_cluster_subresponsibility(self, cluster, weights, cluster_bern_norm, log_cluster_bern)  
-            #preresponsibility[cluster, :] = clustsubresp
-            clustsublogresp = compute_cluster_subresponsibility(self, cluster, weights, cluster_bern_norm, log_cluster_bern)  
+            clustsublogresp, clustsubresp = compute_cluster_subresponsibility(self, cluster, weights, cluster_bern_norm, log_cluster_bern)  
+            preresponsibility[cluster, :] = clustsubresp
             prelogresponsibility[cluster, :] = clustsublogresp
             
             #unbern[cluster,:,:]=bern[cluster,:,:]*len(self.get_spikes_in_cluster(cluster))
@@ -348,11 +363,11 @@ class KK(object):
         #responsibility = preresponsibility/sumresponsibility
         self.run_callbacks('e_step_before_main_loop',  cluster=cluster,
                           )
-        compute_log_p_and_assign(self, prelogresponsibility, only_evaluate_current_clusters)       
+                
         #compute_log_p_and_assign(self, weights, bern, only_evaluate_current_clusters)
             
         self.run_callbacks('e_step_after_main_loop')
-        #embed()
+        embed()
         # we've reassigned clusters so we need to recompute the partitions, but we don't want to
         # reindex yet because we may reassign points to different clusters and we need the original
         # cluster numbers for that
@@ -361,8 +376,6 @@ class KK(object):
     @add_slots
     def compute_penalty(self, clusters=None):
         penalty = compute_penalty(self, clusters)
-        if clusters is None:
-            self.penalty = penalty
         return penalty
 
     @add_slots
@@ -382,23 +395,19 @@ class KK(object):
         score, score_raw, score_penalty = self.compute_score()
         candidate_cluster = -1
         improvement = -inf
-        #embed()
-        #We  only delete a single cluster at a time, 
-        #so we pick the optimal candidate for deletion
         for cluster in range(num_clusters):
             new_clusters = self.clusters.copy()
             # reassign points
             cursic = sic[sico[cluster]:sico[cluster+1]]
             new_clusters[cursic] = self.clusters_second_best[cursic]
             # compute penalties if we reassigned this
-            new_penalty = self.compute_penalty(new_clusters)
-            new_score = score_raw+deletion_loss[cluster]+new_penalty
+            penalties = self.compute_penalty(new_clusters)
+            new_score = score_raw+deletion_loss[cluster]+sum(penalties)
             cur_improvement = score-new_score # we want improvement to be a positive value
-            #embed()
             if cur_improvement>improvement:
                 improvement = cur_improvement
                 candidate_cluster = cluster
-        #embed()
+
         if improvement>0:
             # delete this cluster
             num_points_in_candidate = sico[candidate_cluster+1]-sico[candidate_cluster]
@@ -413,18 +422,17 @@ class KK(object):
             # at this point we have invalidated the partitions, so to make sure we don't miss
             # something, we wipe them out here
             self.partition_clusters()
-#            self.compute_penalty() # and recompute the penalties
+            self.compute_penalty() # and recompute the penalties
             # we've also invalidated the second best log_p and clusters
             self.log_p_second_best = None
             self.clusters_second_best = None
             # and we will need to do a full step next time
-            #self.force_next_step_full = True
+            self.force_next_step_full = True
 
     @add_slots
     def compute_score(self):
-        #essential_params = self.num_clusters_alive*self.num_KKruns*(sum(self.D_k)-self.num_KKruns) #\sum_{k=1}^{num_KKruns} D(k)
-        penalty = self.penalty
-        raw = -2*sum(self.log_p_best) #Check this factor AIC = 2k-2log(L)
+        penalty = self.num_clusters_alive*self.num_KKruns #\sum_{k=1}^{num_KKruns} D(k)
+        raw = sum(self.log_p_best)
         score = raw+penalty
         self.log('debug', 'compute_score: raw %f + penalty %f = %f' % (raw, penalty, score))
         return score, raw, penalty
@@ -590,7 +598,7 @@ class KK(object):
                     K3.initialise_clusters(clusters)
                     K3.prepare_for_iterate()
                     K3.MEC_steps(only_evaluate_current_clusters=True)
-#                    K3.compute_penalty()
+                    K3.compute_penalty()
                     score_ref, _, _ = K3.compute_score()
 
                 I1 = (K2.clusters==1)
@@ -599,7 +607,7 @@ class KK(object):
                 K3.initialise_clusters(clusters)
                 K3.prepare_for_iterate()
                 K3.MEC_steps(only_evaluate_current_clusters=True)
-#                K3.compute_penalty()
+                K3.compute_penalty()
                 score_new, _, _ = K3.compute_score()
 
             if score_new<score_ref:
