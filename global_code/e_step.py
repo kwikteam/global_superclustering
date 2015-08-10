@@ -70,6 +70,14 @@ def assign_and_cluster(kk, prelogresponsibility,
     clusters = kk.clusters
     clusters_second_best = kk.clusters_second_best
     old_clusters = kk.old_clusters
+    
+    for p in np.arange(num_spikes):
+        orderfrombest = np.argsort(-prelogresponsibility[:,p])
+        kk.log_p_best[p] = prelogresponsibility[orderfrombest[0],p]
+        kk.log_p_second_best[p] = prelogresponsibility[orderfrombest[1],p]
+        kk.clusters[p] = orderfrombest[0]
+        kk.clusters_second_best[p] = orderfrombest[1]
+    
     #full_step = kk.full_step
    
     #cluster_log_p = numpy.zeros(num_spikes)

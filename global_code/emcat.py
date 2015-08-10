@@ -4,7 +4,7 @@ import hashlib
 from six import iteritems
 from logger import log_message
 #from hamming_maskstarts import hamming_maskstarts
-from compute_penalty import compute_penalty
+#from compute_penalty import compute_penalty
 from m_step import compute_cluster_bern
 from e_step import compute_cluster_subresponsibility
 # compute_cluster_bern
@@ -165,7 +165,7 @@ class KK(object):
 
         while self.current_iteration<self.max_iterations:
             self.MEC_steps()
-            self.compute_penalty() 
+#            self.compute_penalty() 
             if recurse and self.consider_cluster_deletion:
                 self.consider_deletion()
             old_score = score
@@ -354,10 +354,10 @@ class KK(object):
         # cluster numbers for that
         self.partition_clusters()
 
-    @add_slots
-    def compute_penalty(self, clusters=None):
-        penalty = compute_penalty(self, clusters)
-        return penalty
+#    @add_slots
+#    def compute_penalty(self, clusters=None):
+#        penalty = compute_penalty(self, clusters)
+#        return penalty
 
     @add_slots
     def consider_deletion(self):
@@ -382,8 +382,8 @@ class KK(object):
             cursic = sic[sico[cluster]:sico[cluster+1]]
             new_clusters[cursic] = self.clusters_second_best[cursic]
             # compute penalties if we reassigned this
-            penalties = self.compute_penalty(new_clusters)
-            new_score = score_raw+deletion_loss[cluster]+sum(penalties)
+#            penalties = self.compute_penalty(new_clusters)
+            new_score = score_raw+deletion_loss[cluster]#+sum(penalties)
             cur_improvement = score-new_score # we want improvement to be a positive value
             if cur_improvement>improvement:
                 improvement = cur_improvement
@@ -403,7 +403,7 @@ class KK(object):
             # at this point we have invalidated the partitions, so to make sure we don't miss
             # something, we wipe them out here
             self.partition_clusters()
-            self.compute_penalty() # and recompute the penalties
+#            self.compute_penalty() # and recompute the penalties
             # we've also invalidated the second best log_p and clusters
             self.log_p_second_best = None
             self.clusters_second_best = None
@@ -412,7 +412,7 @@ class KK(object):
 
     @add_slots
     def compute_score(self):
-        penalty = self.num_clusters_alive*self.num_KKruns #\sum_{k=1}^{num_KKruns} D(k)
+        penalty = self.num_clusters_alive*self.num_KKruns*(self.D_k-1) #\sum_{k=1}^{num_KKruns} D(k)
         raw = sum(self.log_p_best)
         score = raw+penalty
         self.log('debug', 'compute_score: raw %f + penalty %f = %f' % (raw, penalty, score))
@@ -579,7 +579,7 @@ class KK(object):
                     K3.initialise_clusters(clusters)
                     K3.prepare_for_iterate()
                     K3.MEC_steps(only_evaluate_current_clusters=True)
-                    K3.compute_penalty()
+#                    K3.compute_penalty()
                     score_ref, _, _ = K3.compute_score()
 
                 I1 = (K2.clusters==1)
@@ -588,7 +588,7 @@ class KK(object):
                 K3.initialise_clusters(clusters)
                 K3.prepare_for_iterate()
                 K3.MEC_steps(only_evaluate_current_clusters=True)
-                K3.compute_penalty()
+#                K3.compute_penalty()
                 score_new, _, _ = K3.compute_score()
 
             if score_new<score_ref:
