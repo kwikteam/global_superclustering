@@ -17,4 +17,5 @@ default_parameters = dict(
      consider_cluster_deletion=True,
      break_fraction = 0.0,
      num_cpus=None,
+     max_split_iterations = None,
      )
