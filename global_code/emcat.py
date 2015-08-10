@@ -308,7 +308,7 @@ class KK(object):
         #unbern = zeros((num_clusters, num_KKruns, max_Dk_size), dtype = int)
         log_bern = zeros((num_clusters, num_KKruns, max_Dk_size), dtype = float)
         prelogresponsibility = zeros((num_clusters, num_spikes), dtype = float)
-        preresponsibility = zeros((num_clusters, num_spikes), dtype = float)
+        #preresponsibility = zeros((num_clusters, num_spikes), dtype = float)
         ########### M step ########################################################
         # Normalize by total number of points to give class weight
         weights = (num_cluster_members)/denom
@@ -337,8 +337,9 @@ class KK(object):
         #for cluster in range(num_clusters):
             ########### EC steps ######################################################
             
-            clustsublogresp, clustsubresp = compute_cluster_subresponsibility(self, cluster, weights, cluster_bern_norm, log_cluster_bern)  
-            preresponsibility[cluster, :] = clustsubresp
+            #clustsublogresp, clustsubresp = compute_cluster_subresponsibility(self, cluster, weights, cluster_bern_norm, log_cluster_bern)  
+            #preresponsibility[cluster, :] = clustsubresp
+            clustsublogresp = compute_cluster_subresponsibility(self, cluster, weights, cluster_bern_norm, log_cluster_bern)  
             prelogresponsibility[cluster, :] = clustsublogresp
             
             #unbern[cluster,:,:]=bern[cluster,:,:]*len(self.get_spikes_in_cluster(cluster))
@@ -382,6 +383,8 @@ class KK(object):
         candidate_cluster = -1
         improvement = -inf
         #embed()
+        #We  only delete a single cluster at a time, 
+        #so we pick the optimal candidate for deletion
         for cluster in range(num_clusters):
             new_clusters = self.clusters.copy()
             # reassign points
@@ -391,11 +394,11 @@ class KK(object):
             new_penalty = self.compute_penalty(new_clusters)
             new_score = score_raw+deletion_loss[cluster]+new_penalty
             cur_improvement = score-new_score # we want improvement to be a positive value
-            embed()
+            #embed()
             if cur_improvement>improvement:
                 improvement = cur_improvement
                 candidate_cluster = cluster
-        embed()
+        #embed()
         if improvement>0:
             # delete this cluster
             num_points_in_candidate = sico[candidate_cluster+1]-sico[candidate_cluster]

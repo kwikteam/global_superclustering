@@ -19,8 +19,7 @@ def compute_cluster_subresponsibility(kk, cluster, weights, cluster_bern, log_cl
     
     #prodexcludeself = np.prod(num_cluster_members)/num_spikes_in_cluster
     
-    #clust_subresponsibility = np.full(num_spikes,weights[cluster])*prodexcludeself
-    clust_subresponsibility = np.full(num_spikes,weights[cluster])
+    #clust_subresponsibility = np.full(num_spikes,weights[cluster])
     filler = np.log(weights[cluster])- num_kkruns*np.log(num_spikes_in_cluster)
     clust_sublogresponsibility = np.full(num_spikes,filler)
     print(filler)
@@ -31,27 +30,27 @@ def compute_cluster_subresponsibility(kk, cluster, weights, cluster_bern, log_cl
         zero_kkruns = np.delete(prezero_kkruns, nonzero_kkruns)
         clust_sublogresponsibility[p] += np.sum(log_cluster_bern[zero_kkruns,0])   
         clust_sublogresponsibility[p] += np.sum(log_cluster_bern[supersparsekks[super_start[p]:super_end[p],0],supersparsekks[super_start[p]:super_end[p],1]])
-        clust_subresponsibility[p] *= np.prod(cluster_bern[zero_kkruns,0])   
-        clust_subresponsibility[p] *= np.prod(cluster_bern[supersparsekks[super_start[p]:super_end[p],0],supersparsekks[super_start[p]:super_end[p],1]])
-        #find_sublogresponsibility(clust_sublogresponsibility,cluster_bern,supersparsekks, super_start, super_end, num_spikes,num_kkruns)
-        #for k in np.arange(num_kkruns):
-           # if k not in nonzero_kkruns:
-        #for k in zero_kkruns:    
-        #    clust_sublogresponsibility[p] += log_cluster_bern[k,0]
-        #num_nontrivial = super_end[p]-super_start[p]
-        #for i in np.arange(num_nontrivial):
-            #kkrun = supersparsekks[super_start[p]+i,0]
-            #dlocal = supersparsekks[super_start[p]+i,1]
-            #print(kkrun)
-            #print('cluster_bern [%g,%g] = '%(kkrun, dlocal), cluster_bern[kkrun, dlocal])
-            #clust_sublogresponsibility[p] += log_cluster_bern[kkrun, dlocal]
+        #clust_subresponsibility[p] *= np.prod(cluster_bern[zero_kkruns,0])   
+        #clust_subresponsibility[p] *= np.prod(cluster_bern[supersparsekks[super_start[p]:super_end[p],0],supersparsekks[super_start[p]:super_end[p],1]])
+        ##find_sublogresponsibility(clust_sublogresponsibility,cluster_bern,supersparsekks, super_start, super_end, num_spikes,num_kkruns)
+        ##for k in np.arange(num_kkruns):
+        #   # if k not in nonzero_kkruns:
+        ##for k in zero_kkruns:    
+        ##    clust_sublogresponsibility[p] += log_cluster_bern[k,0]
+        ##num_nontrivial = super_end[p]-super_start[p]
+        ##for i in np.arange(num_nontrivial):
+            ##kkrun = supersparsekks[super_start[p]+i,0]
+           # #dlocal = supersparsekks[super_start[p]+i,1]
+           # #print(kkrun)
+           # #print('cluster_bern [%g,%g] = '%(kkrun, dlocal), cluster_bern[kkrun, dlocal])
+           # #clust_sublogresponsibility[p] += log_cluster_bern[kkrun, dlocal]
          
     time_taken = time.time()-start_time
-    print('Time taken for computing clust_sublogresponsibility %.2f s' %(time_taken))
-    
+    print('Time taken for computing clust_sublogresponsibility %.2f s' %(time_taken))   
     print('clust_sublogresponsibility for cluster %g'%(cluster), clust_sublogresponsibility)
-    print('clust_subresponsibility for cluster %g'%(cluster), clust_subresponsibility)
-    return clust_sublogresponsibility, clust_subresponsibility      
+    #print('clust_subresponsibility for cluster %g'%(cluster), clust_subresponsibility)
+    #return clust_sublogresponsibility, clust_subresponsibility     
+    return clust_sublogresponsibility
 
 def compute_log_p_and_assign(kk, prelogresponsibility, 
                              only_evaluate_current_clusters):
@@ -77,6 +76,7 @@ def compute_log_p_and_assign(kk, prelogresponsibility,
             p = pp
         else:
             p = candidates[pp]        
+        #Fix bug where log_p_second_best is -inf
         orderfrombest = np.argsort(-prelogresponsibility[:,p])
         kk.log_p_best[p] = prelogresponsibility[orderfrombest[0],p]
         #Fix bug where log_p_second_best is -inf
@@ -87,7 +87,18 @@ def compute_log_p_and_assign(kk, prelogresponsibility,
             kk.log_p_second_best[p] = prelogresponsibility[orderfrombest[0],p]
         kk.clusters[p] = orderfrombest[0]
         kk.clusters_second_best[p] = orderfrombest[1]
-    
+        
+    if only_evaluate_current_clusters:
+        return
+      
+    #for p in np.arange(num_spikes):
+    #    log_p = cluster_log_p
+        
+    #    cur_log_p_best = log_p_best[p]
+    #    cur_log_p_second_best = 
+        
+        
+        
     #full_step = kk.full_step
    
     #cluster_log_p = numpy.zeros(num_spikes)
