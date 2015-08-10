@@ -6,7 +6,7 @@ from logger import log_message
 #from hamming_maskstarts import hamming_maskstarts
 #from compute_penalty import compute_penalty
 from m_step import compute_cluster_bern
-from e_step import compute_cluster_subresponsibility
+from e_step import compute_cluster_subresponsibility, compute_log_p_and_assign
 # compute_cluster_bern
 from default_parameters import default_parameters
 import time
@@ -165,7 +165,8 @@ class KK(object):
 
         while self.current_iteration<self.max_iterations:
             self.MEC_steps()
-#            self.compute_penalty() 
+            self.compute_penalty() 
+            embed()
             if recurse and self.consider_cluster_deletion:
                 self.consider_deletion()
             old_score = score
@@ -191,13 +192,14 @@ class KK(object):
                                                                          self.num_clusters_alive,
                                                                          num_changed, score)
 
-            last_step_full = self.full_step
-            self.full_step = (num_changed>self.num_changed_threshold*self.num_spikes or
-                              num_changed==0 or
-                              self.current_iteration % self.full_step_every == 0 or
-                              (old_score is not None and score > old_score))
-            if not hasattr(self, 'old_log_p_best'):
-                self.full_step = True
+            #last_step_full = self.full_step
+            #self.full_step = (num_changed>self.num_changed_threshold*self.num_spikes or
+            #                  num_changed==0 or
+            #                  self.current_iteration % self.full_step_every == 0 or
+            #                  (old_score is not None and score > old_score))
+           # if not hasattr(self, 'old_log_p_best'):
+            #    self.full_step = True 
+            # We are no longer concerned about whether or not steps are full
 
             self.reindex_clusters()
 
@@ -212,8 +214,8 @@ class KK(object):
 
             # Splitting logic
             iterations_until_next_split -= 1
-            if num_changed==0 and last_step_full:
-                self.log('info', 'No points changed and last step was full, so trying to split.')
+            if num_changed==0:
+                self.log('info', 'No points changed, so trying to split.')
                 iterations_until_next_split = 0
 
             # Cycle detection/breaking
@@ -241,10 +243,10 @@ class KK(object):
 
             self.run_callbacks('end_iteration')
 
-#            if num_changed==0 and last_step_full and not did_split:
-#                self.log('info', 'No points changed, previous step was full and did not split, '
-#                                 'so finishing.')
-#                break
+            if num_changed==0 and not did_split:
+                self.log('info', 'No points changed, previous step was full and did not split, '
+                                 'so finishing.')
+                break
 
             if num_changed<self.break_fraction*self.num_spikes:
                 self.log('info', 'Number of points changed below break fraction, so finishing.')
@@ -344,7 +346,7 @@ class KK(object):
         #responsibility = preresponsibility/sumresponsibility
         self.run_callbacks('e_step_before_main_loop',  cluster=cluster,
                           )
-                
+        compute_log_p_and_assign(self, prelogresponsibility, only_evaluate_current_clusters)       
         #compute_log_p_and_assign(self, weights, bern, only_evaluate_current_clusters)
             
         self.run_callbacks('e_step_after_main_loop')
@@ -354,10 +356,12 @@ class KK(object):
         # cluster numbers for that
         self.partition_clusters()
 
-#    @add_slots
-#    def compute_penalty(self, clusters=None):
-#        penalty = compute_penalty(self, clusters)
-#        return penalty
+    @add_slots
+    def compute_penalty(self, clusters=None):
+        penalty = compute_penalty(self, clusters)
+        if clusters is None:
+	    self.penalty = penalty
+        return penalty
 
     @add_slots
     def consider_deletion(self):
@@ -408,11 +412,12 @@ class KK(object):
             self.log_p_second_best = None
             self.clusters_second_best = None
             # and we will need to do a full step next time
-            self.force_next_step_full = True
+            #self.force_next_step_full = True
 
     @add_slots
     def compute_score(self):
-        penalty = self.num_clusters_alive*self.num_KKruns*(self.D_k-1) #\sum_{k=1}^{num_KKruns} D(k)
+        #essential_params = self.num_clusters_alive*self.num_KKruns*(sum(self.D_k)-self.num_KKruns) #\sum_{k=1}^{num_KKruns} D(k)
+        penalty = self.penalty
         raw = sum(self.log_p_best)
         score = raw+penalty
         self.log('debug', 'compute_score: raw %f + penalty %f = %f' % (raw, penalty, score))
