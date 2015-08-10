@@ -53,7 +53,7 @@ def compute_cluster_subresponsibility(kk, cluster, weights, cluster_bern, log_cl
     print('clust_subresponsibility for cluster %g'%(cluster), clust_subresponsibility)
     return clust_sublogresponsibility, clust_subresponsibility      
 
-def assign_and_cluster(kk, prelogresponsibility, 
+def compute_log_p_and_assign(kk, prelogresponsibility, 
                              only_evaluate_current_clusters):
     num_clusters = len(kk.num_cluster_members)
     num_kkruns = kk.num_KKruns
@@ -71,17 +71,27 @@ def assign_and_cluster(kk, prelogresponsibility,
     clusters_second_best = kk.clusters_second_best
     old_clusters = kk.old_clusters
     
-    for p in np.arange(num_spikes):
+    #for p in np.arange(num_spikes):
+    for pp in np.arange(num_spikes):
+        if not only_evaluate_current_clusters:
+            p = pp
+        else:
+            p = candidates[pp]        
         orderfrombest = np.argsort(-prelogresponsibility[:,p])
         kk.log_p_best[p] = prelogresponsibility[orderfrombest[0],p]
-        kk.log_p_second_best[p] = prelogresponsibility[orderfrombest[1],p]
+        #Fix bug where log_p_second_best is -inf
+        # In this case, set log_p_second_best = log_p_best
+        if np.isfinite(prelogresponsibility[orderfrombest[1],p]):
+            kk.log_p_second_best[p] = prelogresponsibility[orderfrombest[1],p]
+        else: 
+            kk.log_p_second_best[p] = prelogresponsibility[orderfrombest[0],p]
         kk.clusters[p] = orderfrombest[0]
         kk.clusters_second_best[p] = orderfrombest[1]
     
     #full_step = kk.full_step
    
     #cluster_log_p = numpy.zeros(num_spikes)
-    candidates = zeros(0, dtype=int)
+    #candidates = zeros(0, dtype=int)
     
     #do_log_p_assign_computations(
                                   

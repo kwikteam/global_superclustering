@@ -167,7 +167,7 @@ class KK(object):
             self.MEC_steps()
             #embed()
             self.compute_penalty() 
-            embed()
+            #embed()
             if recurse and self.consider_cluster_deletion:
                 self.consider_deletion()
             old_score = score
@@ -351,7 +351,7 @@ class KK(object):
         #compute_log_p_and_assign(self, weights, bern, only_evaluate_current_clusters)
             
         self.run_callbacks('e_step_after_main_loop')
-        embed()
+        #embed()
         # we've reassigned clusters so we need to recompute the partitions, but we don't want to
         # reindex yet because we may reassign points to different clusters and we need the original
         # cluster numbers for that
@@ -381,6 +381,7 @@ class KK(object):
         score, score_raw, score_penalty = self.compute_score()
         candidate_cluster = -1
         improvement = -inf
+        #embed()
         for cluster in range(num_clusters):
             new_clusters = self.clusters.copy()
             # reassign points
@@ -390,6 +391,7 @@ class KK(object):
             new_penalty = self.compute_penalty(new_clusters)
             new_score = score_raw+deletion_loss[cluster]+new_penalty
             cur_improvement = score-new_score # we want improvement to be a positive value
+            embed()
             if cur_improvement>improvement:
                 improvement = cur_improvement
                 candidate_cluster = cluster
