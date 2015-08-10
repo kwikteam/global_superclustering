@@ -15,5 +15,6 @@ default_parameters = dict(
      max_possible_clusters=1000,
      dist_thresh=log(10000.0),
      consider_cluster_deletion=True,
+     break_fraction = 0.0,
      num_cpus=None,
      )

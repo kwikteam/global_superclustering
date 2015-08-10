@@ -165,9 +165,9 @@ class KK(object):
 
         while self.current_iteration<self.max_iterations:
             self.MEC_steps()
-            embed()
-            self.compute_penalty() 
             #embed()
+            self.compute_penalty() 
+            embed()
             if recurse and self.consider_cluster_deletion:
                 self.consider_deletion()
             old_score = score
@@ -393,7 +393,7 @@ class KK(object):
             if cur_improvement>improvement:
                 improvement = cur_improvement
                 candidate_cluster = cluster
-
+        embed()
         if improvement>0:
             # delete this cluster
             num_points_in_candidate = sico[candidate_cluster+1]-sico[candidate_cluster]
