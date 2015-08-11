@@ -181,12 +181,24 @@ def obtain_superclusters_from_bernoulli(bernoulli_matrix, spikes_in_cluster):
      
     '''
     
-    single_supercluster = np.zeros((spikes_in_cluster, bernoulli_matrix.shape[1] ),dtype = int)
+    single_supercluster = np.zeros((spikes_in_cluster, bernoulli_matrix.shape[0] ),dtype = int)
     for rr in np.arange(bernoulli_matrix.shape[0]):
         freqdata = np.random.multinomial(spikes_in_cluster,bernoulli_matrix[rr]) #these are the frequencies
+        nut = get_permuted_array_clusters_from_freqdata(freqdata)
         single_supercluster[:,rr]= get_permuted_array_clusters_from_freqdata(freqdata)
     
     return single_supercluster
+
+def generate_single_supercluster_points(alpha,num_kkruns, num_spikes_in_cluster):
+    alpha_permie = generate_kkrun_samples_from_permuted_dirichlet(alpha, num_kkruns)
+    aleph = list(alpha_permie)
+    print(aleph)
+    bernie = obtain_bernoulli_from_dirichlet_alphalist(aleph)
+    print(bernie)
+    print(np.sum(bernie, axis = 1))
+    superbern = obtain_superclusters_from_bernoulli(bernie, num_spikes_in_cluster)
+    
+    return superbern
         
           
   

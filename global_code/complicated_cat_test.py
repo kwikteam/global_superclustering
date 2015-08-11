@@ -26,3 +26,7 @@ np.sum(bernie, axis = 1)
 superbern = tc.obtain_superclusters_from_bernoulli(bernie, 20)
 superbern.shape
 print(superbern)
+
+alpha = np.array([1, 1,2, 5,1, 4,9])
+superbernie = tc.generate_single_supercluster_points(alpha, 12, 40)
+print(superbernie)
