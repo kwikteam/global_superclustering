@@ -139,6 +139,11 @@ class GlobalSparseData(object):
         self.num_spikes = super_start.shape[0]
         return supersparsekks, superlistkks, super_start, super_end,unique_superclusters, \
      unique_superclusters_ends, super_frequency, x, y
+ 
+    def subset(self, spikes):
+            return GlobalSparseData(self.supersparsekks, 
+                              self.super_start[spikes], self.super_end[spikes]
+                              )
 
     def supercluster_distribution(self):
         max_freq = np.amax(self.super_frequency)
