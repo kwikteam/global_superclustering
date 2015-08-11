@@ -73,7 +73,8 @@ class KK(object):
       defined additional arguments and keyword arguments.
     '''
     def __init__(self, data, callbacks=None, name = '',
-                 is_copy=False, map_log_to_debug=False, **params):
+                 is_subset=False, is_copy=False, 
+                 map_log_to_debug=False, **params):
         
         self.name = name
         if callbacks is None:
@@ -81,10 +82,11 @@ class KK(object):
         self.callbacks = callbacks
         self.data = data
         self.cluster_hashes = set()
+        self.is_subset = is_subset
         self.is_copy = is_copy
         self.map_log_to_debug = map_log_to_debug
         # user parameters
-        show_params = name=='' and not is_copy
+        show_params = name=='' and not is_subset and not is_copy
         self.params = params
         actual_params = default_parameters.copy()
         for k, v in iteritems(params):
@@ -131,7 +133,20 @@ class KK(object):
                   callbacks=self.callbacks,
                   is_copy=True,
                   **params)
- 
+                  
+    def subset(self, spikes, name='kk_subset', **additional_params):
+            newdata = self.data.subset(spikes)
+            if self.name:
+                sep = '.'
+            else:
+                sep = ''
+            params = self.params.copy()
+            params.update(**additional_params)
+            return KK(newdata, name=self.name+sep+name,
+                      callbacks=self.callbacks,
+                      is_subset=True,
+                      **params) 
+                      
     def initialise_clusters(self, clusters):
         self.clusters = clusters
         self.old_clusters = -1*ones(len(self.clusters), dtype=int)
