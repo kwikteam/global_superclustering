@@ -1,11 +1,12 @@
 import numpy as np
 import time
+from IPython import embed
 #from e_step_cy import *
 #find_sublogresponsibility
 
 def compute_cluster_subresponsibility(kk, cluster, weights, cluster_bern, log_cluster_bern):
     '''compute the numerator of the responsibilities
-       bern[cluster, KKrun, localclust] '''
+       log_cluster_bern.shape = (num_ '''
     data = kk.data
     supersparsekks = data.supersparsekks
     super_start = data.super_start
@@ -24,12 +25,18 @@ def compute_cluster_subresponsibility(kk, cluster, weights, cluster_bern, log_cl
     clust_sublogresponsibility = np.full(num_spikes,filler)
     print(filler)
     start_time = time.time()
+    allkkrun_dims = np.arange(num_kkruns, dtype = int)
     for p in np.arange(num_spikes):        
-        nonzero_kkruns = supersparsekks[super_start[p]:super_end[p],0]
-        prezero_kkruns = np.arange(num_kkruns)
-        zero_kkruns = np.delete(prezero_kkruns, nonzero_kkruns)
-        clust_sublogresponsibility[p] += np.sum(log_cluster_bern[zero_kkruns,0])   
-        clust_sublogresponsibility[p] += np.sum(log_cluster_bern[supersparsekks[super_start[p]:super_end[p],0],supersparsekks[super_start[p]:super_end[p],1]])
+        origin_superclusters = np.zeros(num_kkruns, dtype = int)
+        origin_superclusters[supersparsekks[super_start[p]:super_end[p],0]] = supersparsekks[super_start[p]:super_end[p],1]
+        clust_sublogresponsibility[p] += np.sum(log_cluster_bern[allkkrun_dims,origin_superclusters])
+        #embed()
+        #nonzero_kkruns = supersparsekks[super_start[p]:super_end[p],0]
+        #prezero_kkruns = np.arange(num_kkruns)
+        #zero_kkruns = np.delete(prezero_kkruns, nonzero_kkruns)
+        #clust_sublogresponsibility[p] += np.sum(log_cluster_bern[zero_kkruns,0])   
+        #clust_sublogresponsibility[p] += np.sum(log_cluster_bern[supersparsekks[super_start[p]:super_end[p],0],supersparsekks[super_start[p]:super_end[p],1]])
+        #embed()
         #clust_subresponsibility[p] *= np.prod(cluster_bern[zero_kkruns,0])   
         #clust_subresponsibility[p] *= np.prod(cluster_bern[supersparsekks[super_start[p]:super_end[p],0],supersparsekks[super_start[p]:super_end[p],1]])
         ##find_sublogresponsibility(clust_sublogresponsibility,cluster_bern,supersparsekks, super_start, super_end, num_spikes,num_kkruns)
