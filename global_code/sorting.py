@@ -121,6 +121,8 @@ class GlobalSparseData(object):
         self.offsets = offsets
         self.num_KKruns = numKKs
         self.D_k = D_k
+        # Derived data
+        #self.num_spikes = len(self.values_start)
 
     def to_sparse_data(self):
         values_start = self.offsets[:-1]
@@ -140,6 +142,7 @@ class GlobalSparseData(object):
         return supersparsekks, superlistkks, super_start, super_end,unique_superclusters, \
      unique_superclusters_ends, super_frequency, x, y
  
+    #subset need amending
     def subset(self, spikes):
             return GlobalSparseData(self.supersparsekks, 
                               self.super_start[spikes], self.super_end[spikes],
