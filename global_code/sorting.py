@@ -142,7 +142,7 @@ class GlobalSparseData(object):
  
     def subset(self, spikes):
             return GlobalSparseData(self.supersparsekks, 
-                              self.super_start[spikes], self.super_end[spikes]
+                              self.super_start[spikes], self.super_end[spikes],
                               self.num_KKruns, self.D_k
                               )
 
