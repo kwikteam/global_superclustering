@@ -112,7 +112,7 @@ def obtain_bernoulli_from_dirichlet_alphalist(alpha_list):
         bernoulli[row, :len(alpha)] = np.array(np.random.dirichlet(alpha,1))
     
     return bernoulli    
-        
+
 def get_permuted_array_clusters_from_freqdata(catdata):
     '''obtain a list of clusters from frequencies of
     clusterings
@@ -121,9 +121,11 @@ def get_permuted_array_clusters_from_freqdata(catdata):
     array([ 1,  1,  3,  8,  5, 22])
     
     OUTPUT:
-    An ordered list of integers,
-    ordered_clusters = [0 1 2 2 2 3 3 3 3 3 3 3 3 4 4 4 4 4 5 
-    5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5]
+    An permuted list of integers,
+    
+     permuted_clusters = [5 3 5 3 5 5 4 4 3 5 5 5 5 5 3 5 4
+     5 5 5 5 2 5 3 4 1 4 5 5 5 5 0 5 2 2 3 5
+     3 3 5]
     
     '''
     clusterlist = []
@@ -133,7 +135,10 @@ def get_permuted_array_clusters_from_freqdata(catdata):
     chainie = itertools.chain(*clusterlist)    
     cha = list(chainie)
     ordered_clusters = np.array(cha)
-    return ordered_clusters
+    #ordered_clusters = [0 1 2 2 2 3 3 3 3 3 3 3 3 4 4 4 4 4 5 
+    #5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5]
+    permuted_clusters = np.random.permutation(ordered_clusters)
+    return permuted_clusters
 
 def obtain_superclusters_from_bernoulli(bernoulli_matrix, spikes_in_cluster):
     '''
