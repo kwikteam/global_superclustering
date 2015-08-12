@@ -137,8 +137,9 @@ class GlobalSparseData(object):
         self.ordering_perm = x
         self.inv_ordering_perm = y
         self.num_spikes = super_start.shape[0]
-        return supersparsekks, superlistkks, super_start, super_end,unique_superclusters, \
-     unique_superclusters_ends, super_frequency, x, y
+        return SparseData(supersparsekks, super_start, super_end, self.num_KKruns, self.D_k)
+       # return supersparsekks, superlistkks, super_start, super_end,unique_superclusters, \
+    # unique_superclusters_ends, super_frequency, x, y
 
     def supercluster_distribution(self):
         max_freq = np.amax(self.super_frequency)
@@ -179,39 +180,25 @@ class GlobalSparseData(object):
 class SparseData(object):
     '''
     Notes:
-    - Assumes that the spikes are in sorted mask order, can use unmasked_start
-      as a proxy for the identity of the mask
+    - Assumes that the spikes are in sorted mask order, 
     '''
-    def __init__(self,supersparsekks, superlistkks, super_start, super_end,unique_superclusters, \
-     unique_superclusters_ends, super_frequency, x, y):
+    def __init__(self, supersparsekks, super_start, 
+                   super_end, num_KKruns, D_k):
          
         # Data arrays
         self.supersparsekks = supersparsekks
-        self.noise_variance = noise_variance
         self.super_start = super_start
         self.super_end = super_end
-        self.masks = masks
-        self.values_start = values_start
-        self.values_end = values_end
-        self.unmasked = unmasked
-        self.unmasked_start = unmasked_start
-        self.unmasked_end = unmasked_end
-        self.correction_terms = correction_terms
-        self.float_num_unmasked = float_num_unmasked
-        # Derived data
-        self.num_spikes = len(self.values_start)
-        self.num_features = len(self.noise_mean)
+        self.num_KKruns = num_KKruns
+        self.D_k = D_k
         
-        self.num_masks = len(unique(self.unmasked_start))
+        # Derived data
+        self.num_spikes = len(self.super_start)
         
     def subset(self, spikes):
-        return SparseData(self.noise_mean, self.noise_variance,
-                          self.features, self.masks,
-                          self.values_start[spikes], self.values_end[spikes],
-                          self.unmasked,
-                          self.unmasked_start[spikes], self.unmasked_end[spikes],
-                          self.correction_terms,
-                          self.float_num_unmasked[spikes],
-                          )
+        return SparseData(self.supersparsekks, self.super_start[spikes],
+                 self.super_end[spikes], self.num_KKruns, 
+                   self.D_k,
+                   )
 
     

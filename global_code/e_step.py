@@ -23,7 +23,7 @@ def compute_cluster_subresponsibility(kk, cluster, weights, cluster_bern, log_cl
     #clust_subresponsibility = np.full(num_spikes,weights[cluster])
     filler = np.log(weights[cluster])- num_kkruns*np.log(num_spikes_in_cluster)
     clust_sublogresponsibility = np.full(num_spikes,filler)
-    print(filler)
+    #print(filler)
     start_time = time.time()
     allkkrun_dims = np.arange(num_kkruns, dtype = int)
     for p in np.arange(num_spikes):        
@@ -53,10 +53,9 @@ def compute_cluster_subresponsibility(kk, cluster, weights, cluster_bern, log_cl
            # #clust_sublogresponsibility[p] += log_cluster_bern[kkrun, dlocal]
          
     time_taken = time.time()-start_time
-    print('Time taken for computing clust_sublogresponsibility %.2f s' %(time_taken))   
-    print('clust_sublogresponsibility for cluster %g'%(cluster), clust_sublogresponsibility)
-    #print('clust_subresponsibility for cluster %g'%(cluster), clust_subresponsibility)
-    #return clust_sublogresponsibility, clust_subresponsibility     
+    #print('Time taken for computing clust_sublogresponsibility %.2f s' %(time_taken))   
+    #print('clust_sublogresponsibility for cluster %g'%(cluster), clust_sublogresponsibility)
+     
     return clust_sublogresponsibility
 
 def compute_log_p_and_assign(kk, prelogresponsibility, 

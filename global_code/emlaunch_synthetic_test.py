@@ -25,21 +25,21 @@ picklefile = '/home/skadir/globalphy/global_superclustering/global_code/syntheti
 pkl_file = open(picklefile,'rb')
 mixture = pickle.load(pkl_file)
 pkl_file.close()  
-embed()
+#embed()
 mixture_dict = mixture[0]
 num_starting_clusters = 8
 num_spikes = mixture_dict['superclusters'].shape[0]
 initclust = tc.generate_random_initial_clustering(num_starting_clusters, num_spikes )
 #superdata used to be called silly
 superdata = sorting.sparsify_superclusters(mixture_dict['superclusters'])
-outsil = superdata.to_sparse_data() #don't need to write the outsil variable, everything is stored within the sparse class
+outsparse = superdata.to_sparse_data() #don't need to write the outsil variable, everything is stored within the sparse class
 distdata = superdata.supercluster_distribution()
 start_time = time.time()
 [clust10, dic10] = superdata.clump_fine_clustering(10)
 time_taken_clump = time.time()-start_time
 print('Time taken for clump clustering %.2f s' %(time_taken_clump))
 
-kk = KK(superdata,**script_params)
+kk = KK(outsparse,**script_params)
 #kk.cluster_from(clust10)
 kk.cluster_from(initclust)
 #Automatically create clust100 via
