@@ -4,7 +4,7 @@ from IPython import embed
 #from e_step_cy import *
 #find_sublogresponsibility
 
-def compute_cluster_subresponsibility(kk, cluster, weights, cluster_bern, log_cluster_bern):
+def compute_cluster_subresponsibility(kk, cluster, weights, log_cluster_bern):
     '''compute the numerator of the responsibilities
        log_cluster_bern.shape = (num_ '''
     data = kk.data
@@ -87,6 +87,7 @@ def compute_log_p_and_assign(kk, prelogresponsibility,
         kk.log_p_best[p] = prelogresponsibility[orderfrombest[0],p]
         #Fix bug where log_p_second_best is -inf
         # In this case, set log_p_second_best = log_p_best
+        #print('only_evaluate_current_clusters = ', only_evaluate_current_clusters)
         if np.isfinite(prelogresponsibility[orderfrombest[1],p]):
             kk.log_p_second_best[p] = prelogresponsibility[orderfrombest[1],p]
         else: 

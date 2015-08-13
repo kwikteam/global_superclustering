@@ -27,7 +27,7 @@ mixture = pickle.load(pkl_file)
 pkl_file.close()  
 #embed()
 mixture_dict = mixture[0]
-num_starting_clusters = 8
+num_starting_clusters = 15
 num_spikes = mixture_dict['superclusters'].shape[0]
 initclust = tc.generate_random_initial_clustering(num_starting_clusters, num_spikes )
 #superdata used to be called silly

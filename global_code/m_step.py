@@ -1,4 +1,5 @@
 import numpy as np
+from IPython import embed
 
 def compute_cluster_bern(kk,cluster,max_Dk):
     data = kk.data
@@ -27,8 +28,12 @@ def compute_cluster_bern(kk,cluster,max_Dk):
             cluster_bern[k,d] += 1
             cluster_bern[k,0] += -1
     #cluster_bern_norm = cluster_bern        
-    cluster_bern_norm = cluster_bern/num_spikes_in_cluster
-    return cluster_bern, cluster_bern_norm 
+    cluster_non_zero_entries = np.count_nonzero(cluster_bern)
+    
+    #embed()
+    log_cluster_bern = np.log(cluster_bern)
+    #cluster_bern_norm = cluster_bern/num_spikes_in_cluster
+    return log_cluster_bern, cluster_non_zero_entries 
             
     
      
