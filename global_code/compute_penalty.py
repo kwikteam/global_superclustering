@@ -5,7 +5,9 @@ __all__ = ['compute_penalties']
 def compute_penalty(kk, clusters):
       if clusters is None:
           clusters = kk.clusters
-      num_clusters = np.amax(clusters)+1 #this is wrong - remember to fix
+      num_cluster_membs = np.array(np.bincount(clusters), dtype=int)
+      alive = num_cluster_membs>0
+      num_clusters = np.sum(alive)
       #This now only depends on the number of clusters 
       #cluster_penalty = np.zeros(num_clusters)
       num_spikes = kk.num_spikes

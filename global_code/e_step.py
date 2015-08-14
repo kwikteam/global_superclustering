@@ -84,16 +84,25 @@ def compute_log_p_and_assign(kk, prelogresponsibility,
             p = candidates[pp]        
         #Fix bug where log_p_second_best is -inf
         orderfrombest = np.argsort(-prelogresponsibility[:,p])
+        #print('prelogresponsibility[:,p],shape = ',prelogresponsibility[:,p].shape)
+        if len(orderfrombest) <2:
+            print('orderfrombest = ',orderfrombest)
+            print(-prelogresponsibility[:,p])
+            #embed()
         kk.log_p_best[p] = prelogresponsibility[orderfrombest[0],p]
         #Fix bug where log_p_second_best is -inf
         # In this case, set log_p_second_best = log_p_best
         #print('only_evaluate_current_clusters = ', only_evaluate_current_clusters)
-        if np.isfinite(prelogresponsibility[orderfrombest[1],p]):
+        #print(p)
+        #embed()
+        if not (len(orderfrombest) <2) and np.isfinite(prelogresponsibility[orderfrombest[1],p]):
             kk.log_p_second_best[p] = prelogresponsibility[orderfrombest[1],p]
         else: 
             kk.log_p_second_best[p] = prelogresponsibility[orderfrombest[0],p]
         kk.clusters[p] = orderfrombest[0]
-        kk.clusters_second_best[p] = orderfrombest[1]
+        
+        if not (len(orderfrombest) <2):
+            kk.clusters_second_best[p] = orderfrombest[1]
         
     if only_evaluate_current_clusters:
         return

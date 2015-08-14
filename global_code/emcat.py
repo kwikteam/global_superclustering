@@ -260,7 +260,7 @@ class KK(object):
             self.run_callbacks('end_iteration')
 
             if num_changed==0 and not did_split:
-                self.log('info', 'No points changed, previous step was full and did not split, '
+                self.log('info', 'No points changed, and did not split, '
                                  'so finishing.')
                 break
 
@@ -319,8 +319,8 @@ class KK(object):
         
         clusters_to_kill = []
         
-        bern = zeros((num_clusters, num_KKruns, max_Dk_size), dtype = float)
-        #unbern = zeros((num_clusters, num_KKruns, max_Dk_size), dtype = int)
+        #bern = zeros((num_clusters, num_KKruns, max_Dk_size), dtype = float)
+        num_bern_params = zeros(num_clusters, dtype = int)
         log_bern = zeros((num_clusters, num_KKruns, max_Dk_size), dtype = float)
         prelogresponsibility = zeros((num_clusters, num_spikes), dtype = float)
         #preresponsibility = zeros((num_clusters, num_spikes), dtype = float)
@@ -339,11 +339,12 @@ class KK(object):
             # cluster_bern has shape (max_possible_clusters, D, num_KKruns)
             # Note that we do this densely at the moment, might want to switch
             # that to a sparse structure later
-            [cluster_bern, cluster_bern_norm] = compute_cluster_bern(self, cluster, max_Dk) 
-           # print(cluster_bern)
-            #unbern[cluster, :, :] = cluster_bern
-            bern[cluster, :, :] = cluster_bern
-            log_cluster_bern = log(cluster_bern) 
+           # [log_cluster_bern, num_cluster_non_zero_params] = compute_cluster_bern(self, cluster, max_Dk) 
+            [log_cluster_bern, num_bern_params[cluster]] = compute_cluster_bern(self, cluster, max_Dk) 
+           # print(log_cluster_bern, 'num_params = ', num_bern_params[cluster])
+            
+            #bern[cluster, :, :] = cluster_bern
+            #log_cluster_bern = log(cluster_bern) 
             log_bern[cluster,:,:] = log_cluster_bern     
             #embed()
             # Compute generalized Bernoulli parameters for each cluster
@@ -354,11 +355,11 @@ class KK(object):
             
             #clustsublogresp, clustsubresp = compute_cluster_subresponsibility(self, cluster, weights, cluster_bern_norm, log_cluster_bern)  
             #preresponsibility[cluster, :] = clustsubresp
-            clustsublogresp = compute_cluster_subresponsibility(self, cluster, weights, cluster_bern_norm, log_cluster_bern)  
+            clustsublogresp = compute_cluster_subresponsibility(self, cluster, weights,  log_cluster_bern)  
             prelogresponsibility[cluster, :] = clustsublogresp
             
             #unbern[cluster,:,:]=bern[cluster,:,:]*len(self.get_spikes_in_cluster(cluster))
-        
+        self.num_bern_params = num_bern_params
         #sumresponsibility = sum(preresponsibility, axis = 0)
         #responsibility = preresponsibility/sumresponsibility
         self.run_callbacks('e_step_before_main_loop',  cluster=cluster,
@@ -382,6 +383,7 @@ class KK(object):
 
     @add_slots
     def consider_deletion(self):
+        print('attempting deletion \n')
         num_cluster_members = self.num_cluster_members
         num_clusters = self.num_clusters_alive
         
@@ -393,7 +395,8 @@ class KK(object):
         deletion_loss = zeros(num_clusters)
         I = arange(self.num_spikes)
         add.at(deletion_loss, self.clusters, log_p_second_best-log_p_best)
-
+        #add.at(deletion_loss, self.clusters, log_p_best-log_p_second_best)
+        
         score, score_raw, score_penalty = self.compute_score()
         candidate_cluster = -1
         improvement = -inf
@@ -406,6 +409,7 @@ class KK(object):
             cursic = sic[sico[cluster]:sico[cluster+1]]
             new_clusters[cursic] = self.clusters_second_best[cursic]
             # compute penalties if we reassigned this
+           # embed()
             new_penalty = self.compute_penalty(new_clusters)
             new_score = score_raw+deletion_loss[cluster]+new_penalty
             cur_improvement = score-new_score # we want improvement to be a positive value
@@ -440,8 +444,10 @@ class KK(object):
         #essential_params = self.num_clusters_alive*self.num_KKruns*(sum(self.D_k)-self.num_KKruns) #\sum_{k=1}^{num_KKruns} D(k)
         penalty = self.penalty
         raw = -2*sum(self.log_p_best) #Check this factor AIC = 2k-2log(L)
+        #raw = 2*sum(self.log_p_best)
         score = raw+penalty
         self.log('debug', 'compute_score: raw %f + penalty %f = %f' % (raw, penalty, score))
+        print('debug', 'compute_score: raw %f + penalty %f = %f' % (raw, penalty, score))
         return score, raw, penalty
     
     @property
