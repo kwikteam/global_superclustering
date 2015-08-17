@@ -432,7 +432,7 @@ class KK(object):
             # at this point we have invalidated the partitions, so to make sure we don't miss
             # something, we wipe them out here
             self.partition_clusters()
-#            self.compute_penalty() # and recompute the penalties
+            self.compute_penalty() # and recompute the penalties
             # we've also invalidated the second best log_p and clusters
             self.log_p_second_best = None
             self.clusters_second_best = None
@@ -611,7 +611,7 @@ class KK(object):
                     K3.initialise_clusters(clusters)
                     K3.prepare_for_iterate()
                     K3.MEC_steps(only_evaluate_current_clusters=True)
-#                    K3.compute_penalty()
+                    K3.compute_penalty()
                     score_ref, _, _ = K3.compute_score()
 
                 I1 = (K2.clusters==1)
@@ -620,7 +620,7 @@ class KK(object):
                 K3.initialise_clusters(clusters)
                 K3.prepare_for_iterate()
                 K3.MEC_steps(only_evaluate_current_clusters=True)
-#                K3.compute_penalty()
+                K3.compute_penalty()
                 score_new, _, _ = K3.compute_score()
 
             if score_new<score_ref:
