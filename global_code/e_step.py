@@ -81,6 +81,7 @@ def compute_log_p_and_assign(kk, prelogresponsibility,
         if not only_evaluate_current_clusters:
             p = pp
         else:
+            embed()
             p = candidates[pp]        
         #Fix bug where log_p_second_best is -inf
         orderfrombest = np.argsort(-prelogresponsibility[:,p])

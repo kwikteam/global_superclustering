@@ -12,6 +12,7 @@ default_parameters = dict(
      num_changed_threshold=0.05,
      split_first=20,
      split_every=40,
+     fast_split=False,
      max_possible_clusters=1000,
      dist_thresh=log(10000.0),
      consider_cluster_deletion=False,
