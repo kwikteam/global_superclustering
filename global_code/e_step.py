@@ -86,9 +86,9 @@ def compute_log_p_and_assign(kk, prelogresponsibility,
         #Fix bug where log_p_second_best is -inf
         orderfrombest = np.argsort(-prelogresponsibility[:,p])
         #print('prelogresponsibility[:,p],shape = ',prelogresponsibility[:,p].shape)
-        if len(orderfrombest) <2:
-            print('orderfrombest = ',orderfrombest)
-            print(-prelogresponsibility[:,p])
+ #       if len(orderfrombest) <2:
+            #print('orderfrombest = ',orderfrombest)
+            #print(-prelogresponsibility[:,p])
             #embed()
         kk.log_p_best[p] = prelogresponsibility[orderfrombest[0],p]
         #Fix bug where log_p_second_best is -inf

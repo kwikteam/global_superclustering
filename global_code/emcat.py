@@ -394,8 +394,8 @@ class KK(object):
 
         deletion_loss = zeros(num_clusters)
         I = arange(self.num_spikes)
-        add.at(deletion_loss, self.clusters, log_p_second_best-log_p_best)
-        #add.at(deletion_loss, self.clusters, log_p_best-log_p_second_best)
+        #add.at(deletion_loss, self.clusters, log_p_second_best-log_p_best)
+        add.at(deletion_loss, self.clusters, log_p_best-log_p_second_best)
         
         score, score_raw, score_penalty = self.compute_score()
         candidate_cluster = -1
@@ -412,6 +412,10 @@ class KK(object):
            # embed()
             new_penalty = self.compute_penalty(new_clusters)
             new_score = score_raw+deletion_loss[cluster]+new_penalty
+            print('score_raw', score_raw)
+            print('deletion_loss[%g] ='%cluster, deletion_loss[cluster])
+            print('new score =', new_score)
+            print('new_penalty = ', new_penalty)
             cur_improvement = score-new_score # we want improvement to be a positive value
             #embed()
             if cur_improvement>improvement:
