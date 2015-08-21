@@ -196,7 +196,26 @@ class KK(object):
             clusters_changed, = (self.clusters!=self.old_clusters).nonzero()
             clusters_changed = array(clusters_changed, dtype=int)
             num_changed = len(clusters_changed)
-            
+            if num_changed:
+                # add these changed clusters to all the candidate sets
+                num_candidates = 0
+                max_candidates = min(self.max_candidates,
+                    self.max_candidates_fraction*self.num_spikes*self.num_clusters_alive)
+                with section(self, 'union'):
+                    for cluster, candidates in list(self.candidates.items()):
+                        candidates = union1d(candidates, clusters_changed)
+                        self.candidates[cluster] = candidates
+                        num_candidates += len(candidates)
+                        if num_candidates>max_candidates:
+                            self.candidates = dict()
+                            #self.force_next_step_full = True
+                            if num_candidates>self.max_candidates:
+                                self.log('info', 'Ran out of storage space, try increasing '
+                                                 'max_candidates if this happens often.')
+                            else:
+                                self.log('debug', 'Exceeded quick step point fraction, next step '
+                                                  'will be full')
+                            break
 
             self.run_callbacks('scores', score=score, score_raw=score_raw,
                                score_penalty=score_penalty, old_score=old_score,
@@ -230,6 +249,7 @@ class KK(object):
                 print(msg)
                 self.log('debug', msg)
             if (old_score is not None) and old_score-score <0:
+                print('WARNING: The score has gone up, this should never happen \n Try to debug it')
                 embed()    
 
             # Splitting logic
@@ -326,9 +346,9 @@ class KK(object):
             for cluster in range(num_clusters):
                 self.candidates[cluster] = self.get_spikes_in_cluster(cluster)
             self.collect_candidates = False
-        #else:
-        #    self.candidates = dict()
-        #    self.collect_candidates = True
+        else:
+            self.candidates = dict()
+            self.collect_candidates = True
         
         
         clusters_to_kill = []
