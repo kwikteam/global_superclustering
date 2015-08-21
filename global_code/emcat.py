@@ -179,6 +179,7 @@ class KK(object):
         self.log('info', 'Starting iteration 0 with %d clusters' % self.num_clusters_alive)
 
         while self.current_iteration<self.max_iterations:
+            self.log('debug', 'Starting iteration %d' % self.current_iteration)
             self.MEC_steps()
             #embed()
             self.compute_penalty() 
@@ -190,6 +191,7 @@ class KK(object):
             old_score_penalty = score_penalty
             score, score_raw, score_penalty = self.compute_score()
             self.score_history.append((score, score_raw, score_penalty))
+            print('score_history ', self.score_history)
             
             clusters_changed, = (self.clusters!=self.old_clusters).nonzero()
             clusters_changed = array(clusters_changed, dtype=int)
@@ -218,7 +220,6 @@ class KK(object):
             # We are no longer concerned about whether or not steps are full
 
             self.reindex_clusters()
-
             if old_score is not None:
                 msg += ' (decreased by %f)' % (old_score-score)
             self.log('info', msg)
@@ -226,7 +227,10 @@ class KK(object):
                 msg = 'Change in scores: raw=%f, penalty=%f, total=%f'  % (old_score_raw-score_raw,
                                                                            old_score_penalty-score_penalty,
                                                                            old_score-score)
+                print(msg)
                 self.log('debug', msg)
+            if (old_score is not None) and old_score-score <0:
+                embed()    
 
             # Splitting logic
             iterations_until_next_split -= 1
@@ -317,6 +321,16 @@ class KK(object):
         if not only_evaluate_current_clusters:
             self.log_p_best[:] = 0
         
+        if only_evaluate_current_clusters:
+            self.candidates = dict() # replaces quick_step_candidates
+            for cluster in range(num_clusters):
+                self.candidates[cluster] = self.get_spikes_in_cluster(cluster)
+            self.collect_candidates = False
+        #else:
+        #    self.candidates = dict()
+        #    self.collect_candidates = True
+        
+        
         clusters_to_kill = []
         
         #bern = zeros((num_clusters, num_KKruns, max_Dk_size), dtype = float)
@@ -395,7 +409,8 @@ class KK(object):
         deletion_loss = zeros(num_clusters)
         I = arange(self.num_spikes)
         #add.at(deletion_loss, self.clusters, log_p_second_best-log_p_best)
-        add.at(deletion_loss, self.clusters, log_p_best-log_p_second_best)
+        #add.at(deletion_loss, self.clusters, log_p_best-log_p_second_best)
+        add.at(deletion_loss, self.clusters, 2*(log_p_best-log_p_second_best))
         
         score, score_raw, score_penalty = self.compute_score()
         candidate_cluster = -1
@@ -412,7 +427,7 @@ class KK(object):
            # embed()
             new_penalty = self.compute_penalty(new_clusters)
             new_score = score_raw+deletion_loss[cluster]+new_penalty
-            print('score_raw', score_raw)
+            print('SCORE_RAW', score_raw)
             print('deletion_loss[%g] ='%cluster, deletion_loss[cluster])
             print('new score =', new_score)
             print('new_penalty = ', new_penalty)
@@ -421,6 +436,7 @@ class KK(object):
             if cur_improvement>improvement:
                 improvement = cur_improvement
                 candidate_cluster = cluster
+            print('candidate_cluster ',    candidate_cluster)  
         #embed()
         if improvement>0:
             # delete this cluster
@@ -608,6 +624,7 @@ class KK(object):
 
             with section(self, 'split_evaluation'):
                 # will splitting improve the score in the whole data set?
+                print('evaluation of split with K3')
                 K3 = self.copy(name='split_evaluation', map_log_to_debug=True)
                 clusters = self.clusters.copy()
 

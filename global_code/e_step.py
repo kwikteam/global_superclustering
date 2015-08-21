@@ -75,6 +75,9 @@ def compute_log_p_and_assign(kk, prelogresponsibility,
     clusters = kk.clusters
     clusters_second_best = kk.clusters_second_best
     old_clusters = kk.old_clusters
+    log_p = np.zeros(num_spikes)
+    
+   # if only_evaluate_current_clusters:
     
     #for p in np.arange(num_spikes):
     for pp in np.arange(num_spikes):
@@ -90,12 +93,19 @@ def compute_log_p_and_assign(kk, prelogresponsibility,
             #print('orderfrombest = ',orderfrombest)
             #print(-prelogresponsibility[:,p])
             #embed()
+            
         kk.log_p_best[p] = prelogresponsibility[orderfrombest[0],p]
+        #log_p[p] = prelogresponsibility[orderfrombest[0],p]
+        
+        cur_log_p_best = log_p_best[p]
+        cur_log_p_second_best = log_p_second_best[p]
+        
         #Fix bug where log_p_second_best is -inf
         # In this case, set log_p_second_best = log_p_best
         #print('only_evaluate_current_clusters = ', only_evaluate_current_clusters)
         #print(p)
         #embed()
+        
         if not (len(orderfrombest) <2) and np.isfinite(prelogresponsibility[orderfrombest[1],p]):
             kk.log_p_second_best[p] = prelogresponsibility[orderfrombest[1],p]
         else: 
@@ -105,8 +115,8 @@ def compute_log_p_and_assign(kk, prelogresponsibility,
         if not (len(orderfrombest) <2):
             kk.clusters_second_best[p] = orderfrombest[1]
         
-    if only_evaluate_current_clusters:
-        return
+   # if only_evaluate_current_clusters:
+    #    return
       
     #for p in np.arange(num_spikes):
     #    log_p = cluster_log_p
