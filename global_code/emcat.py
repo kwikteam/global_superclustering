@@ -196,26 +196,26 @@ class KK(object):
             clusters_changed, = (self.clusters!=self.old_clusters).nonzero()
             clusters_changed = array(clusters_changed, dtype=int)
             num_changed = len(clusters_changed)
-            if num_changed:
-                # add these changed clusters to all the candidate sets
-                num_candidates = 0
-                max_candidates = min(self.max_candidates,
-                    self.max_candidates_fraction*self.num_spikes*self.num_clusters_alive)
-                with section(self, 'union'):
-                    for cluster, candidates in list(self.candidates.items()):
-                        candidates = union1d(candidates, clusters_changed)
-                        self.candidates[cluster] = candidates
-                        num_candidates += len(candidates)
-                        if num_candidates>max_candidates:
-                            self.candidates = dict()
-                            #self.force_next_step_full = True
-                            if num_candidates>self.max_candidates:
-                                self.log('info', 'Ran out of storage space, try increasing '
-                                                 'max_candidates if this happens often.')
-                            else:
-                                self.log('debug', 'Exceeded quick step point fraction, next step '
-                                                  'will be full')
-                            break
+           # if num_changed:
+          #      # add these changed clusters to all the candidate sets
+           #     num_candidates = 0
+           #     max_candidates = min(self.max_candidates,
+            #        self.max_candidates_fraction*self.num_spikes*self.num_clusters_alive)
+           #     with section(self, 'union'):
+            #        for cluster, candidates in list(self.candidates.items()):
+                        #candidates = union1d(candidates, clusters_changed)
+                        #self.candidates[cluster] = candidates
+                        #num_candidates += len(candidates)
+                        #if num_candidates>max_candidates:
+                            #self.candidates = dict()
+                            ##self.force_next_step_full = True
+                            #if num_candidates>self.max_candidates:
+                                #self.log('info', 'Ran out of storage space, try increasing '
+                                                 #'max_candidates if this happens often.')
+                            #else:
+                                #self.log('debug', 'Exceeded quick step point fraction, next step '
+                                                  #'will be full')
+                            #break
 
             self.run_callbacks('scores', score=score, score_raw=score_raw,
                                score_penalty=score_penalty, old_score=old_score,
@@ -332,23 +332,23 @@ class KK(object):
             self.clusters_second_best = -ones(num_spikes, dtype=int)
             if hasattr(self, 'log_p_best'):
                 self.old_log_p_best = self.log_p_best
-            self.log_p_best = inf*ones(num_spikes)
-            self.log_p_second_best = inf*ones(num_spikes)
+            self.log_p_best = -inf*ones(num_spikes)
+            self.log_p_second_best = -inf*ones(num_spikes)
         
 
         num_skipped = 0
         
-        if not only_evaluate_current_clusters:
-            self.log_p_best[:] = 0
+       # if not only_evaluate_current_clusters:
+       #     self.log_p_best[:] = 0
         
-        if only_evaluate_current_clusters:
-            self.candidates = dict() # replaces quick_step_candidates
-            for cluster in range(num_clusters):
-                self.candidates[cluster] = self.get_spikes_in_cluster(cluster)
-            self.collect_candidates = False
-        else:
-            self.candidates = dict()
-            self.collect_candidates = True
+      #  if only_evaluate_current_clusters:
+      #      self.candidates = dict() # replaces quick_step_candidates
+      #      for cluster in range(num_clusters):
+      #          self.candidates[cluster] = self.get_spikes_in_cluster(cluster)
+      #      self.collect_candidates = False
+      #  else:
+      #      self.candidates = dict()
+      #      self.collect_candidates = True
         
         
         clusters_to_kill = []
@@ -447,16 +447,16 @@ class KK(object):
            # embed()
             new_penalty = self.compute_penalty(new_clusters)
             new_score = score_raw+deletion_loss[cluster]+new_penalty
-            print('SCORE_RAW', score_raw)
-            print('deletion_loss[%g] ='%cluster, deletion_loss[cluster])
-            print('new score =', new_score)
-            print('new_penalty = ', new_penalty)
+           # print('SCORE_RAW', score_raw)
+          #  print('deletion_loss[%g] ='%cluster, deletion_loss[cluster])
+           # print('new score =', new_score)
+           # print('new_penalty = ', new_penalty)
             cur_improvement = score-new_score # we want improvement to be a positive value
             #embed()
             if cur_improvement>improvement:
                 improvement = cur_improvement
                 candidate_cluster = cluster
-            print('candidate_cluster ',    candidate_cluster)  
+           # print('candidate_cluster ',    candidate_cluster)  
         #embed()
         if improvement>0:
             # delete this cluster
@@ -487,7 +487,7 @@ class KK(object):
         #raw = 2*sum(self.log_p_best)
         score = raw+penalty
         self.log('debug', 'compute_score: raw %f + penalty %f = %f' % (raw, penalty, score))
-        print('debug', 'compute_score: raw %f + penalty %f = %f' % (raw, penalty, score))
+        #print('debug', 'compute_score: raw %f + penalty %f = %f' % (raw, penalty, score))
         return score, raw, penalty
     
     @property
@@ -500,7 +500,7 @@ class KK(object):
 
     @property
     def num_KKruns(self):
-        return self.data.num_KKruns#
+        return self.data.num_KKruns
 
     @property
     def num_clusters_alive(self):
@@ -541,6 +541,7 @@ class KK(object):
         try:
             num_cluster_members = array(bincount(clusters), dtype=int)
         except ValueError:
+            #print(clusters)
             raise PartitionError
         I = array(argsort(clusters), dtype=int)
         y = clusters[I]
@@ -618,8 +619,10 @@ class KK(object):
                     continue
 
                 if self.fast_split:
+                    print('FAST SPLIT: score_target = ', score_target)
                     score_target = unsplit_score
                 else:
+                    print('score_target = will be -inf')
                     score_target = -inf
 
                 try:
