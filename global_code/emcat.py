@@ -185,6 +185,7 @@ class KK(object):
             self.compute_penalty() 
             #embed()
             if recurse and self.consider_cluster_deletion:
+                #embed()
                 self.consider_deletion()
             old_score = score
             old_score_raw = score_raw
@@ -324,7 +325,8 @@ class KK(object):
         # Arrays that will be used in E-step part
         if only_evaluate_current_clusters:
             self.clusters_second_best = zeros(0, dtype=int)
-            self.log_p_best = empty(num_spikes)
+            self.log_p_best = -inf*ones(num_spikes)
+           # self.log_p_best = empty(num_spikes)
             self.log_p_second_best = empty(0)
         else:    
             self.old_clusters = self.clusters
@@ -398,6 +400,8 @@ class KK(object):
         #responsibility = preresponsibility/sumresponsibility
         self.run_callbacks('e_step_before_main_loop',  cluster=cluster,
                           )
+       # if only_evaluate_current_clusters:
+       #     embed()
         compute_log_p_and_assign(self, prelogresponsibility, only_evaluate_current_clusters)       
         #compute_log_p_and_assign(self, weights, bern, only_evaluate_current_clusters)
             
@@ -447,10 +451,10 @@ class KK(object):
            # embed()
             new_penalty = self.compute_penalty(new_clusters)
             new_score = score_raw+deletion_loss[cluster]+new_penalty
-           # print('SCORE_RAW', score_raw)
-          #  print('deletion_loss[%g] ='%cluster, deletion_loss[cluster])
-           # print('new score =', new_score)
-           # print('new_penalty = ', new_penalty)
+            print('SCORE_RAW', score_raw)
+            print('deletion_loss[%g] ='%cluster, deletion_loss[cluster])
+            print('new score =', new_score)
+            print('new_penalty = ', new_penalty)
             cur_improvement = score-new_score # we want improvement to be a positive value
             #embed()
             if cur_improvement>improvement:
@@ -487,7 +491,7 @@ class KK(object):
         #raw = 2*sum(self.log_p_best)
         score = raw+penalty
         self.log('debug', 'compute_score: raw %f + penalty %f = %f' % (raw, penalty, score))
-        #print('debug', 'compute_score: raw %f + penalty %f = %f' % (raw, penalty, score))
+        print('debug', 'compute_score: raw %f + penalty %f = %f' % (raw, penalty, score))
         return score, raw, penalty
     
     @property
@@ -657,17 +661,23 @@ class KK(object):
                     K3.MEC_steps(only_evaluate_current_clusters=True)
                     K3.compute_penalty()
                     score_ref, _, _ = K3.compute_score()
+                   # embed()
 
+                #embed()
                 I1 = (K2.clusters==1)
                 clusters[spikes_in_cluster[I1]] = num_clusters # next available cluster
-
+                
                 K3.initialise_clusters(clusters)
                 K3.prepare_for_iterate()
                 K3.MEC_steps(only_evaluate_current_clusters=True)
                 K3.compute_penalty()
                 score_new, _, _ = K3.compute_score()
-
+            
+            print('score_ref = ', score_ref)
+            print('score_new = ', score_new)
             if score_new<score_ref:
+                print('debug', 'Score improved after splitting, so splitting cluster '
+                                  '%d into %d' % (cluster, num_clusters))
                 self.log('debug', 'Score improved after splitting, so splitting cluster '
                                   '%d into %d' % (cluster, num_clusters))
                 did_split = True

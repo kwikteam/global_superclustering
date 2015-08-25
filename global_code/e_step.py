@@ -132,6 +132,8 @@ def compute_log_p_and_assign(kk, prelogresponsibility,
                 if not (len(orderfrombest) <2):
                     kk.clusters_second_best[p] = orderfrombest[1]
         else:
+            #return
+            #embed()
             if cur_log_p_best < log_p[p]:       
                 kk.log_p_best[p] = log_p[p] 
                 kk.clusters[p] = orderfrombest[0]
