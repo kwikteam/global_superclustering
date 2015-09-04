@@ -27,6 +27,7 @@ def compute_penalty(kk, clusters):
       effective_params = np.sum(num_bern_params_used)-num_kkruns*num_clusters + (num_clusters -1)
       
       penalty = (2*penalty_k*effective_params + penalty_k_log_n*effective_params*np.log(num_spikes)/2)
+      print('penalty = ', penalty)
 
       #do_compute_penalty(cluster_penalty, num_spikes, clusters,
       #                     penalty_k, penalty_k_log_n)

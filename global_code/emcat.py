@@ -183,6 +183,9 @@ class KK(object):
             self.MEC_steps()
             #embed()
             self.compute_penalty() 
+            estep_score, estep_score_raw, estep_score_penalty = self.compute_score()
+            self.score_history.append((estep_score, estep_score_raw, estep_score_penalty, 'pure_e_step'))
+            print('score_history ', self.score_history)
             #embed()
             if recurse and self.consider_cluster_deletion:
                 #embed()
@@ -191,7 +194,7 @@ class KK(object):
             old_score_raw = score_raw
             old_score_penalty = score_penalty
             score, score_raw, score_penalty = self.compute_score()
-            self.score_history.append((score, score_raw, score_penalty))
+            self.score_history.append((score, score_raw, score_penalty, 'post_deletion'))
             print('score_history ', self.score_history)
             
             clusters_changed, = (self.clusters!=self.old_clusters).nonzero()
@@ -279,6 +282,7 @@ class KK(object):
             # Try splitting
             did_split = False
             if recurse and iterations_until_next_split<=0:
+                
                 did_split = self.try_splits()
                 iterations_until_next_split = self.split_every
 
@@ -310,6 +314,7 @@ class KK(object):
         # Computes the masked and unmasked indices for each cluster based on the
         # masks for each point in that cluster. Allocates space for covariance
         # matrices.
+        print('MEC_steps:\n')
         num_clusters = self.num_clusters_alive
         num_KKruns = self.num_KKruns
         num_cluster_members = self.num_cluster_members
@@ -435,7 +440,7 @@ class KK(object):
         #add.at(deletion_loss, self.clusters, log_p_second_best-log_p_best)
         #add.at(deletion_loss, self.clusters, log_p_best-log_p_second_best)
         add.at(deletion_loss, self.clusters, 2*(log_p_best-log_p_second_best))
-        
+        #embed()
         score, score_raw, score_penalty = self.compute_score()
         candidate_cluster = -1
         improvement = -inf
@@ -451,16 +456,16 @@ class KK(object):
            # embed()
             new_penalty = self.compute_penalty(new_clusters)
             new_score = score_raw+deletion_loss[cluster]+new_penalty
-            print('SCORE_RAW', score_raw)
-            print('deletion_loss[%g] ='%cluster, deletion_loss[cluster])
-            print('new score =', new_score)
-            print('new_penalty = ', new_penalty)
+            #print('SCORE_RAW', score_raw)
+            #print('deletion_loss[%g] ='%cluster, deletion_loss[cluster])
+            #print('new score =', new_score)
+            #print('new_penalty = ', new_penalty)
             cur_improvement = score-new_score # we want improvement to be a positive value
             #embed()
             if cur_improvement>improvement:
                 improvement = cur_improvement
                 candidate_cluster = cluster
-           # print('candidate_cluster ',    candidate_cluster)  
+            #print('candidate_cluster ',    candidate_cluster)  
         #embed()
         if improvement>0:
             # delete this cluster
@@ -491,7 +496,7 @@ class KK(object):
         #raw = 2*sum(self.log_p_best)
         score = raw+penalty
         self.log('debug', 'compute_score: raw %f + penalty %f = %f' % (raw, penalty, score))
-        print('debug', 'compute_score: raw %f + penalty %f = %f' % (raw, penalty, score))
+        #print('debug', 'compute_score: raw %f + penalty %f = %f' % (raw, penalty, score))
         return score, raw, penalty
     
     @property
@@ -690,7 +695,7 @@ class KK(object):
 
         # if we split, should make the next step full
         if did_split:
-            self.force_next_step_full = True
+            #self.force_next_step_full = True
             self.log('info', 'Split into %d clusters' % num_clusters)
 
         return did_split

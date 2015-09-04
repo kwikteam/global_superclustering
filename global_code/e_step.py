@@ -114,12 +114,12 @@ def compute_log_p_and_assign(kk, prelogresponsibility,
         if not only_evaluate_current_clusters:
             if cur_log_p_best > log_p[p]:
                 #print('clusters not changing')
-                #kk.log_p_best[p] = cur_log_p_best
+                #kk.log_p_best[p] does not change
                 if cur_log_p_second_best > log_p[p]:
                     kk.log_p_second_best[p] = cur_log_p_second_best
                 else:    
                     kk.log_p_second_best[p] = log_p[p]
-                #clustering does not change    
+                #cluster assignment for point p does not change    
             else:    
                 kk.log_p_best[p] = log_p[p] 
                 if not (len(orderfrombest) <2) and np.isfinite(prelogresponsibility[orderfrombest[1],p]):
@@ -133,8 +133,10 @@ def compute_log_p_and_assign(kk, prelogresponsibility,
                     kk.clusters_second_best[p] = orderfrombest[1]
         else:
             #return
+            #return
             #embed()
-            if cur_log_p_best < log_p[p]:       
+            if cur_log_p_best < log_p[p]:   
+            #    print('OMG e_step reassignment')
                 kk.log_p_best[p] = log_p[p] 
                 kk.clusters[p] = orderfrombest[0]
                 #clusters reassigned due to improvement 
