@@ -184,7 +184,7 @@ class KK(object):
             #embed()
             self.compute_penalty() 
             estep_score, estep_score_raw, estep_score_penalty = self.compute_score()
-            self.score_history.append((estep_score, estep_score_raw, estep_score_penalty, 'pure_e_step'))
+            self.score_history.append((estep_score, estep_score_raw, estep_score_penalty, 'pure_e_step'))#,self.num_cluster_members))
             print('score_history ', self.score_history)
             #embed()
             if recurse and self.consider_cluster_deletion:
@@ -194,7 +194,7 @@ class KK(object):
             old_score_raw = score_raw
             old_score_penalty = score_penalty
             score, score_raw, score_penalty = self.compute_score()
-            self.score_history.append((score, score_raw, score_penalty, 'post_deletion'))
+            self.score_history.append((score, score_raw, score_penalty, 'post_deletion'))#,self.num_cluster_members))
             print('score_history ', self.score_history)
             
             clusters_changed, = (self.clusters!=self.old_clusters).nonzero()
@@ -254,7 +254,8 @@ class KK(object):
                 self.log('debug', msg)
             if (old_score is not None) and old_score-score <0:
                 print('WARNING: The score has gone up, this should never happen \n Try to debug it')
-                embed()    
+                self.log('warning', 'WARNING: The score has gone up, this should never happen \n Try to debug it')
+                #embed()    
 
             # Splitting logic
             iterations_until_next_split -= 1
@@ -469,6 +470,7 @@ class KK(object):
         #embed()
         if improvement>0:
             # delete this cluster
+            print('WE ARE DELETING A CLUSTER')
             num_points_in_candidate = sico[candidate_cluster+1]-sico[candidate_cluster]
             self.log('info', 'Deleting cluster {cluster} ({numpoints} points): improves score '
                              'by {improvement}'.format(cluster=candidate_cluster,

@@ -132,14 +132,15 @@ def compute_log_p_and_assign(kk, prelogresponsibility,
                 if not (len(orderfrombest) <2):
                     kk.clusters_second_best[p] = orderfrombest[1]
         else:
+            kk.log_p_best[p] = log_p[p] 
             #return
             #return
             #embed()
-            if cur_log_p_best < log_p[p]:   
+            #if cur_log_p_best < log_p[p]:   
             #    print('OMG e_step reassignment')
-                kk.log_p_best[p] = log_p[p] 
-                kk.clusters[p] = orderfrombest[0]
-                #clusters reassigned due to improvement 
+                #kk.log_p_best[p] = log_p[p] 
+                #kk.clusters[p] = orderfrombest[0]
+                #clusters reassigned due to improvement - but this should not occur!
                 
    # if only_evaluate_current_clusters:
     #    return
