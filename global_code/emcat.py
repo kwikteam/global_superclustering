@@ -282,7 +282,7 @@ class KK(object):
 
             # Try splitting
             did_split = False
-            if recurse and iterations_until_next_split<=0:
+            if recurse and iterations_until_next_split<=self.min_points_split_cluster:
                 
                 did_split = self.try_splits()
                 iterations_until_next_split = self.split_every
@@ -596,7 +596,8 @@ class KK(object):
                 return did_split
 
             spikes_in_cluster = self.get_spikes_in_cluster(cluster)
-            if len(spikes_in_cluster)==0:
+            #if len(spikes_in_cluster)==0:
+            if len(spikes_in_cluster)<=5:
                 continue
 
             with section(self, 'split_candidate'):

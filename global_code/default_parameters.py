@@ -21,4 +21,5 @@ default_parameters = dict(
      max_candidates = 100000000,  
      max_candidates_fraction = 0.4,
      max_split_iterations = None,
+     min_points_split_cluster = 10,
      )
