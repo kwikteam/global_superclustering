@@ -189,10 +189,12 @@ class KK(object):
             #embed()
             if recurse and self.consider_cluster_deletion:
                 #embed()
+                print('recurse = ', recurse)
                 self.consider_deletion()
             old_score = score
             old_score_raw = score_raw
             old_score_penalty = score_penalty
+            print('pre_compute_score',score, score_raw, score_penalty)
             score, score_raw, score_penalty = self.compute_score()
             self.score_history.append((score, score_raw, score_penalty, 'post_deletion'))#,self.num_cluster_members))
             print('score_history ', self.score_history)
@@ -255,7 +257,7 @@ class KK(object):
             if (old_score is not None) and old_score-score <0:
                 print('WARNING: The score has gone up, this should never happen \n Try to debug it')
                 self.log('warning', 'WARNING: The score has gone up, this should never happen \n Try to debug it')
-                #embed()    
+                embed()    
 
             # Splitting logic
             iterations_until_next_split -= 1
@@ -443,6 +445,7 @@ class KK(object):
         add.at(deletion_loss, self.clusters, 2*(log_p_best-log_p_second_best))
         #embed()
         score, score_raw, score_penalty = self.compute_score()
+        self.score_history.append((score, score_raw, score_penalty, 'pre_deletion'))#,self.num_cluster_members))
         candidate_cluster = -1
         improvement = -inf
         #embed()
@@ -457,16 +460,16 @@ class KK(object):
            # embed()
             new_penalty = self.compute_penalty(new_clusters)
             new_score = score_raw+deletion_loss[cluster]+new_penalty
-            #print('SCORE_RAW', score_raw)
-            #print('deletion_loss[%g] ='%cluster, deletion_loss[cluster])
-            #print('new score =', new_score)
-            #print('new_penalty = ', new_penalty)
+            print('SCORE_RAW', score_raw)
+            print('deletion_loss[%g] ='%cluster, deletion_loss[cluster])
+            print('new score =', new_score)
+            print('new_penalty = ', new_penalty)
             cur_improvement = score-new_score # we want improvement to be a positive value
             #embed()
             if cur_improvement>improvement:
                 improvement = cur_improvement
                 candidate_cluster = cluster
-            #print('candidate_cluster ',    candidate_cluster)  
+            print('candidate_cluster ',    candidate_cluster)  
         #embed()
         if improvement>0:
             # delete this cluster
@@ -494,6 +497,7 @@ class KK(object):
     def compute_score(self):
         #essential_params = self.num_clusters_alive*self.num_KKruns*(sum(self.D_k)-self.num_KKruns) #\sum_{k=1}^{num_KKruns} D(k)
         penalty = self.penalty
+        print('PENALTY', penalty)
         raw = -2*sum(self.log_p_best) #Check this factor AIC = 2k-2log(L)
         #raw = 2*sum(self.log_p_best)
         score = raw+penalty
