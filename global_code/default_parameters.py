@@ -22,4 +22,8 @@ default_parameters = dict(
      max_candidates_fraction = 0.4,
      max_split_iterations = None,
      min_points_split_cluster = 10,
+     save_clu_every = None,
+     run_monitoring_server = False,
+     debug = False,
+     save_all_clu = False,
      )

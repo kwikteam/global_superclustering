@@ -64,8 +64,10 @@ class KK(object):
     Main object used for clustering the supercluster points
     * data = supercluster data
     * Initialisation KK(data,  **params)
-    * Method kk.cluster_mask_starts(num_starting_clusters) will cluster from mask starts.
+    * Method kk.cluster_mask_starts(num_starting_clusters) will cluster from mask starts - 
+      NOT YET FUNCTIONAL
     * Method kk.cluster_from(clusters) will cluster from the given array of cluster assignments.
+      -USING THIS METHOD INSTEAD
     * kk.clusters (after clustering) is the array of cluster assignments.
     * Method kk.register_callback(callback, slot=None) register a callback function that will be
       called at the given slot (see code for slot names), by default at the end of each iteration
@@ -96,12 +98,12 @@ class KK(object):
             setattr(self, k, v)
             if show_params:
                 self.log('info', '%s = %s' % (k, v), suffix='initial_parameters')
-        self.all_params = actual_params
+        self.all_params = actual_params #dictionary of parameters
         
     def register_callback(self, callback, slot='end_iteration'):
         if slot not in self.callbacks:
             self.callbacks[slot] = []
-        self.callbacks[slot].append(callback)
+        self.callbacks[slot].append(callback) # callback dictionary
 
     def run_callbacks(self, slot, *args, **kwds):
         if slot in self.callbacks:

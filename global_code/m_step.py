@@ -28,8 +28,8 @@ def compute_cluster_bern(kk,cluster,max_Dk):
             cluster_bern[k,d] += 1
             cluster_bern[k,0] += -1
     #cluster_bern_norm = cluster_bern        
-    cluster_non_zero_entries = np.count_nonzero(cluster_bern)
-    
+    #cluster_non_zero_entries = np.count_nonzero(cluster_bern)
+    cluster_non_zero_entries = num_kkruns*(max_Dk+1)
     #embed()
     log_cluster_bern = np.log(cluster_bern)
     #cluster_bern_norm = cluster_bern/num_spikes_in_cluster
