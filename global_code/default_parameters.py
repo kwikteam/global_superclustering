@@ -26,4 +26,5 @@ default_parameters = dict(
      run_monitoring_server = False,
      debug = False,
      save_all_clu = False,
+     embed = False,
      )

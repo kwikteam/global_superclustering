@@ -169,6 +169,7 @@ class KK(object):
     def prepare_for_iterate(self):
         self.current_iteration = 0
         self.score_history = []
+        self.cluster_distribution_history = []
     
     def iterate(self, recurse=True, score_target=-inf):        
         self.prepare_for_iterate()
@@ -188,6 +189,7 @@ class KK(object):
             estep_score, estep_score_raw, estep_score_penalty = self.compute_score()
             self.score_history.append((estep_score, estep_score_raw, estep_score_penalty, 'pure_e_step'))#,self.num_cluster_members))
             print('score_history ', self.score_history)
+            self.cluster_distribution_history.append(self.num_cluster_members)
             #embed()
             if recurse and self.consider_cluster_deletion:
                 #embed()
@@ -200,6 +202,7 @@ class KK(object):
             score, score_raw, score_penalty = self.compute_score()
             self.score_history.append((score, score_raw, score_penalty, 'post_deletion'))#,self.num_cluster_members))
             print('score_history ', self.score_history)
+            self.cluster_distribution_history.append(self.num_cluster_members)
             
             clusters_changed, = (self.clusters!=self.old_clusters).nonzero()
             clusters_changed = array(clusters_changed, dtype=int)
@@ -259,7 +262,8 @@ class KK(object):
             if (old_score is not None) and old_score-score <0:
                 print('WARNING: The score has gone up, this should never happen \n Try to debug it')
                 self.log('warning', 'WARNING: The score has gone up, this should never happen \n Try to debug it')
-                embed()    
+                if self.embed:
+                    embed()    
 
             # Splitting logic
             iterations_until_next_split -= 1
@@ -405,6 +409,7 @@ class KK(object):
             prelogresponsibility[cluster, :] = clustsublogresp
             
             #unbern[cluster,:,:]=bern[cluster,:,:]*len(self.get_spikes_in_cluster(cluster))
+        self.prelogresponsibility = prelogresponsibility
         self.num_bern_params = num_bern_params
         #sumresponsibility = sum(preresponsibility, axis = 0)
         #responsibility = preresponsibility/sumresponsibility

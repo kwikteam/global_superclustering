@@ -69,8 +69,9 @@ def reduce_kwik_file(kwik_path_dir, parent_filename, baby_filename, num_spikes):
     if os.path.isfile(kwdname):
         creator._add_recordings_from_kwd(kwdname,sample_rate=sample_rate,)
     else:
-        datname = kwik_path_dir + parent_filename + '.dat'
-        creater._add_recordings_from_dat(datname, sample_rate = sample_rate, n_channels = n_channels, dtype = np.int16)
+        print('associating recording from dat file')
+        datname = kwik_path_dir + parent_filename  + '.dat'
+        creator._add_recordings_from_dat([datname], sample_rate = sample_rate, n_channels = n_channels, dtype = np.int16)
         
 def add_clustering_to_kwik(kwik_path_dir, filename, clustering_name, clu_array):
     basename =    os.path.join(kwik_path_dir, filename)
