@@ -189,7 +189,7 @@ class KK(object):
             estep_score, estep_score_raw, estep_score_penalty = self.compute_score()
             self.score_history.append((estep_score, estep_score_raw, estep_score_penalty, 'pure_e_step'))#,self.num_cluster_members))
             print('score_history ', self.score_history)
-            self.cluster_distribution_history.append(self.num_cluster_members)
+            self.cluster_distribution_history.append((self.num_cluster_members, 'pure_e_step'))
             #embed()
             if recurse and self.consider_cluster_deletion:
                 #embed()
@@ -202,7 +202,7 @@ class KK(object):
             score, score_raw, score_penalty = self.compute_score()
             self.score_history.append((score, score_raw, score_penalty, 'post_deletion'))#,self.num_cluster_members))
             print('score_history ', self.score_history)
-            self.cluster_distribution_history.append(self.num_cluster_members)
+            self.cluster_distribution_history.append((self.num_cluster_members,'post_deletion'))
             
             clusters_changed, = (self.clusters!=self.old_clusters).nonzero()
             clusters_changed = array(clusters_changed, dtype=int)
@@ -262,6 +262,8 @@ class KK(object):
             if (old_score is not None) and old_score-score <0:
                 print('WARNING: The score has gone up, this should never happen \n Try to debug it')
                 self.log('warning', 'WARNING: The score has gone up, this should never happen \n Try to debug it')
+                self.score_history.append('score increase!')
+                self.cluster_distribution_history.append('score increase!')
                 if self.embed:
                     embed()    
 
@@ -409,6 +411,7 @@ class KK(object):
             prelogresponsibility[cluster, :] = clustsublogresp
             
             #unbern[cluster,:,:]=bern[cluster,:,:]*len(self.get_spikes_in_cluster(cluster))
+        self.log_bern = log_bern    
         self.prelogresponsibility = prelogresponsibility
         self.num_bern_params = num_bern_params
         #sumresponsibility = sum(preresponsibility, axis = 0)
@@ -453,6 +456,7 @@ class KK(object):
         #embed()
         score, score_raw, score_penalty = self.compute_score()
         self.score_history.append((score, score_raw, score_penalty, 'pre_deletion'))#,self.num_cluster_members))
+        self.cluster_distribution_history.append((self.num_cluster_members,'pre_deletion'))
         candidate_cluster = -1
         improvement = -inf
         #embed()
