@@ -3,6 +3,8 @@ import numpy as np
 __all__ = ['compute_penalties']
 
 def compute_penalty(kk, clusters):
+      '''Takes kk.clusters (clusters currently assigned)
+      and computes the penalty'''
       if clusters is None:
           clusters = kk.clusters
       num_cluster_membs = np.array(np.bincount(clusters), dtype=int)
@@ -15,7 +17,7 @@ def compute_penalty(kk, clusters):
       num_spikes = kk.num_spikes
       #D_k = kk.D_k
       num_kkruns = kk.num_KKruns
-      num_bern_params = kk.num_bern_params
+      num_bern_params = kk.num_bern_params #This was determined in the previous M-step
       num_bern_params_used = num_bern_params[np.nonzero(num_cluster_membs>0)]
       print('num_bern_params_used = ', num_bern_params_used)
       #num_bern_params =  [70 71 63 63 64 62 83 79] for 8 clusters

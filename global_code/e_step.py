@@ -92,6 +92,18 @@ def compute_log_p_and_assign(kk, prelogresponsibility,
         #Fix bug where log_p_second_best is -inf
         orderfrombest = np.argsort(-prelogresponsibility[:,p])
         #print('prelogresponsibility[:,p],shape = ',prelogresponsibility[:,p].shape)
+        #e.g. for a clustering with 15 clusters
+        # prelogresponsibility[:,p]=
+
+        #array([-17.0767553 , -16.62460313, -17.39244399, -21.39556163,
+        #-17.95783375, -17.15554351, -18.9431675 , -17.22197569,
+        #-17.98608194, -17.59084827, -18.33352782, -18.33929569,
+        #-19.93217079, -17.73675297, -16.3812674 ])
+
+        #orderfrombest = array([14,  1,  0,  5,  7,  2,  9, 13,  4,  8, 10, 11,  6, 12,  3])
+
+    
+        #embed()
  #       if len(orderfrombest) <2:
             #print('orderfrombest = ',orderfrombest)
             #print(-prelogresponsibility[:,p])
@@ -99,7 +111,7 @@ def compute_log_p_and_assign(kk, prelogresponsibility,
         #embed()    
         #kk.log_p_best[p] = prelogresponsibility[orderfrombest[0],p]
         log_p[p] = prelogresponsibility[orderfrombest[0],p]
-        
+        #log_p[p] = -16.381267402829636
         cur_log_p_best = log_p_best[p]
         if not only_evaluate_current_clusters:
             cur_log_p_second_best = log_p_second_best[p]
@@ -111,9 +123,10 @@ def compute_log_p_and_assign(kk, prelogresponsibility,
         
         #embed()
         
-        if not only_evaluate_current_clusters:
+        if not only_evaluate_current_clusters:        
             if cur_log_p_best > log_p[p]:
-                #print('clusters not changing')
+                print('WARNING: cluster assignment for point p not changing')
+                embed()
                 #kk.log_p_best[p] does not change
                 if cur_log_p_second_best > log_p[p]:
                     kk.log_p_second_best[p] = cur_log_p_second_best
@@ -131,6 +144,18 @@ def compute_log_p_and_assign(kk, prelogresponsibility,
                 #print('clusters being reassigned') 
                 if not (len(orderfrombest) <2):
                     kk.clusters_second_best[p] = orderfrombest[1]
+                
+                #Alternative
+                #kk.log_p_best[p] = log_p[p] 
+                #if not (len(orderfrombest) <2) and np.isfinite(prelogresponsibility[orderfrombest[1],p]):
+                    #kk.log_p_second_best[p] = prelogresponsibility[orderfrombest[1],p]
+                #else: 
+                    #kk.log_p_second_best[p] = prelogresponsibility[orderfrombest[0],p]
+                #kk.clusters[p] = orderfrombest[0]
+                ##clusters reassigned due to improvement 
+                ##print('clusters being reassigned') 
+                #if not (len(orderfrombest) <2):
+                    #kk.clusters_second_best[p] = orderfrombest[1]                 
         else:
             kk.log_p_best[p] = log_p[p] 
             #return

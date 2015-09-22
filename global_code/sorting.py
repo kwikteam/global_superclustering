@@ -1,6 +1,7 @@
 import pickle
 import numpy as np
 from supercluster import *
+from IPython import embed
 
 def sparsify_superclusters(superclusters):
     num_spikes = superclusters.shape[0]
@@ -67,6 +68,8 @@ def reduce_supermasks_from_arrays(Ostart, Oend, I, K):
         #    print(len(curind))
         curstr = curind.tostring()
         if curstr!=oldstr:
+            #if curind == []:
+                #embed()
             new_indices.append(curind)
             oldstr = curstr
             curstart = curend
@@ -75,6 +78,7 @@ def reduce_supermasks_from_arrays(Ostart, Oend, I, K):
         end[i] = curend
     # step 3: convert into start, end
     #print(new_indices)
+   # embed()
     sparse_indices = np.concatenate(new_indices, axis = 0)
     unique_superclusters, frequency = np.unique(start, return_counts = True)
     unique_superclusters_ends = np.unique(end)                                           

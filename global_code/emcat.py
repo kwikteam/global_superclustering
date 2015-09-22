@@ -200,9 +200,9 @@ class KK(object):
             old_score_penalty = score_penalty
             print('pre_compute_score',score, score_raw, score_penalty)
             score, score_raw, score_penalty = self.compute_score()
-            self.score_history.append((score, score_raw, score_penalty, 'post_deletion'))#,self.num_cluster_members))
-            print('score_history ', self.score_history)
-            self.cluster_distribution_history.append((self.num_cluster_members,'post_deletion'))
+            #self.score_history.append((score, score_raw, score_penalty, 'post_deletion'))#,self.num_cluster_members))
+           # print('score_history ', self.score_history)
+            #self.cluster_distribution_history.append((self.num_cluster_members,'post_deletion'))
             
             clusters_changed, = (self.clusters!=self.old_clusters).nonzero()
             clusters_changed = array(clusters_changed, dtype=int)
@@ -261,6 +261,7 @@ class KK(object):
                 self.log('debug', msg)
             if (old_score is not None) and old_score-score <0:
                 print('WARNING: The score has gone up, this should never happen \n Try to debug it')
+                print('score =', score, ' > old_score = ', old_score)
                 self.log('warning', 'WARNING: The score has gone up, this should never happen \n Try to debug it')
                 self.score_history.append('score increase!')
                 self.cluster_distribution_history.append('score increase!')
@@ -409,6 +410,7 @@ class KK(object):
             #preresponsibility[cluster, :] = clustsubresp
             clustsublogresp = compute_cluster_subresponsibility(self, cluster, weights,  log_cluster_bern)  
             prelogresponsibility[cluster, :] = clustsublogresp
+            #embed()
             
             #unbern[cluster,:,:]=bern[cluster,:,:]*len(self.get_spikes_in_cluster(cluster))
         self.log_bern = log_bern    
@@ -455,8 +457,8 @@ class KK(object):
         add.at(deletion_loss, self.clusters, 2*(log_p_best-log_p_second_best))
         #embed()
         score, score_raw, score_penalty = self.compute_score()
-        self.score_history.append((score, score_raw, score_penalty, 'pre_deletion'))#,self.num_cluster_members))
-        self.cluster_distribution_history.append((self.num_cluster_members,'pre_deletion'))
+        #self.score_history.append((score, score_raw, score_penalty, 'pre_deletion'))#,self.num_cluster_members))
+        #self.cluster_distribution_history.append((self.num_cluster_members,'pre_deletion'))
         candidate_cluster = -1
         improvement = -inf
         #embed()
@@ -470,7 +472,7 @@ class KK(object):
             # compute penalties if we reassigned this
            # embed()
             new_penalty = self.compute_penalty(new_clusters)
-            new_score = score_raw+deletion_loss[cluster]+new_penalty
+            new_score = score_raw + deletion_loss[cluster] + new_penalty
             print('SCORE_RAW', score_raw)
             print('deletion_loss[%g] ='%cluster, deletion_loss[cluster])
             print('new score =', new_score)
@@ -503,6 +505,10 @@ class KK(object):
             self.clusters_second_best = None
             # and we will need to do a full step next time
             #self.force_next_step_full = True
+            postscore, postscore_raw, postscore_penalty = self.compute_score()
+            self.score_history.append((postscore, postscore_raw, postscore_penalty, 'post_deletion'))#,self.num_cluster_members))
+            print('score_history ', self.score_history)
+            self.cluster_distribution_history.append((self.num_cluster_members,'post_deletion'))
 
     @add_slots
     def compute_score(self):
@@ -552,7 +558,7 @@ class KK(object):
         self.clusters = remapping[self.clusters]
         total_clusters = sum(I)
         if hasattr(self, '_total_clusters') and total_clusters<self._total_clusters:
-            self.force_next_step_full = True
+            #self.force_next_step_full = True
             if hasattr(self, 'clusters_second_best'):
                 del self.clusters_second_best
         self._total_clusters = total_clusters
@@ -645,12 +651,12 @@ class KK(object):
                 if amax(clusters)!=1:
                     continue
 
-                if self.fast_split:
-                    print('FAST SPLIT: score_target = ', score_target)
-                    score_target = unsplit_score
-                else:
-                    print('score_target = will be -inf')
-                    score_target = -inf
+                #if self.fast_split:
+                    #print('FAST SPLIT: score_target = ', score_target)
+                    #score_target = unsplit_score
+                #else:
+                print('score_target = will be -inf')
+                score_target = -inf
 
                 try:
                     split_score = K2.cluster_from(clusters, recurse=False,
