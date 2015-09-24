@@ -27,9 +27,11 @@ def compute_cluster_bern(kk,cluster,max_Dk):
             d = supersparsekks[super_start[p]+i,1]
             cluster_bern[k,d] += 1
             cluster_bern[k,0] += -1
-    #cluster_bern_norm = cluster_bern        
-    #cluster_non_zero_entries = np.count_nonzero(cluster_bern)
-    cluster_non_zero_entries = num_kkruns*(max_Dk+1)
+    #cluster_bern_norm = cluster_bern    
+    if kk.use_cluster_penalty:
+        cluster_non_zero_entries = np.count_nonzero(cluster_bern)
+    else:
+        cluster_non_zero_entries = num_kkruns*(max_Dk+1)
     #embed()
     log_cluster_bern = np.log(cluster_bern)
     #cluster_bern_norm = cluster_bern/num_spikes_in_cluster

@@ -191,7 +191,7 @@ class KK(object):
             print('score_history ', self.score_history)
             self.cluster_distribution_history.append((self.num_cluster_members, 'pure_e_step'))
             #embed()
-            if recurse and self.consider_cluster_deletion:
+            if recurse and self.consider_cluster_deletion and self.num_clusters_alive>2:
                 #embed()
                 print('recurse = ', recurse)
                 self.consider_deletion()
@@ -200,9 +200,9 @@ class KK(object):
             old_score_penalty = score_penalty
             print('pre_compute_score',score, score_raw, score_penalty)
             score, score_raw, score_penalty = self.compute_score()
-            #self.score_history.append((score, score_raw, score_penalty, 'post_deletion'))#,self.num_cluster_members))
-           # print('score_history ', self.score_history)
-            #self.cluster_distribution_history.append((self.num_cluster_members,'post_deletion'))
+            self.score_history.append((score, score_raw, score_penalty, 'post_deletion'))#,self.num_cluster_members))
+            print('score_history ', self.score_history)
+            self.cluster_distribution_history.append((self.num_cluster_members,'post_deletion'))
             
             clusters_changed, = (self.clusters!=self.old_clusters).nonzero()
             clusters_changed = array(clusters_changed, dtype=int)
@@ -506,9 +506,9 @@ class KK(object):
             # and we will need to do a full step next time
             #self.force_next_step_full = True
             postscore, postscore_raw, postscore_penalty = self.compute_score()
-            self.score_history.append((postscore, postscore_raw, postscore_penalty, 'post_deletion'))#,self.num_cluster_members))
+            self.score_history.append((postscore, postscore_raw, postscore_penalty, 'post_deletion_lit'))#,self.num_cluster_members))
             print('score_history ', self.score_history)
-            self.cluster_distribution_history.append((self.num_cluster_members,'post_deletion'))
+            self.cluster_distribution_history.append((self.num_cluster_members,'post_deletion_lit'))
 
     @add_slots
     def compute_score(self):

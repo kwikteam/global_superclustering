@@ -27,4 +27,5 @@ default_parameters = dict(
      debug = False,
      save_all_clu = False,
      embed = False,
+     use_cluster_penalty = False,
      )

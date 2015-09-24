@@ -3,6 +3,83 @@ import numpy as np
 from supercluster import *
 from IPython import embed
 
+'''
+An illustrative example of sparsification:
+
+NOTE: Sparsification will FAIL if there are any vectors that are all zero. [0,0,0,0,0,0,0] is not permitted in 
+this example
+
+little = np.array([[1,4,5,6,0,0,0], [0,0,0,7,7,1,1], [0,0,0,7,7,1,1], [1,4,5,6,0,0,0], [2,0,1,1,1,1,3], [4,5,0,0,0,12,10],
+
+                   [8,8,8,8,4,4,4], [8,8,8,8,4,4,4],[3,0,1,1,56,13,1],[3,0,1,1,56,13,1],
+
+                  [3,0,0,0,0,0,1], [3,0,0,0,0,0,1],[0,0,0,7,7,1,1],[3,0,1,1,56,13,1], [1,4,5,7,0,0,0],[1,4,5,8,0,0,0]], dtype = int)
+This is a numpy array of superclusters
+
+superlittle = sparsify_superclusters(little)
+superlittle.offsets = array([ 0,  4,  8, 12, 16, 22, 26, 33, 40, 46, 52, 54, 56, 60, 66, 70, 74])
+
+cute_little = superlittle.to_sparse_data()
+
+cute_little.supersparsekks.shape = (41, 2)
+cute_little.supersparsekks = array(
+      [[ 0,  1],
+       [ 1,  4],
+       [ 2,  5],
+       [ 3,  6],
+       [ 0,  1],
+       [ 1,  4],
+       [ 2,  5],
+       [ 3,  7],
+       [ 0,  1],
+       [ 1,  4],
+       [ 2,  5],
+       [ 3,  8],
+       [ 0,  2],
+       [ 2,  1],
+       [ 3,  1],
+       [ 4,  1],
+       [ 5,  1],
+       [ 6,  3],
+       [ 0,  3],
+       [ 2,  1],
+       [ 3,  1],
+       [ 4, 56],
+       [ 5, 13],
+       [ 6,  1],
+       [ 0,  3],
+       [ 6,  1],
+       [ 0,  4],
+       [ 1,  5],
+       [ 5, 12],
+       [ 6, 10],
+       [ 0,  8],
+       [ 1,  8],
+       [ 2,  8],
+       [ 3,  8],
+       [ 4,  4],
+       [ 5,  4],
+       [ 6,  4],
+       [ 3,  7],
+       [ 4,  7],
+       [ 5,  1],
+       [ 6,  1]])
+
+cute_little.super_start = array([ 0, 37, 37,  0, 12, 26, 30, 30, 18, 18, 24, 24, 37, 18,  4,  8])
+cute_little.super_end = array([ 4, 41, 41,  4, 18, 30, 37, 37, 24, 24, 26, 26, 41, 24,  8, 12])
+
+cute_little.num_spikes = 16
+
+cute_little.D_k = array([ 8,  8,  8,  8, 56, 13, 10])
+from vispy.plot import Fig
+>>> fig = Fig()
+>>> ax = fig[0, 0]  # this creates a PlotWidget
+>>> ax.plot([[0, 1], [0, 1]])
+
+
+'''
+
+
 def sparsify_superclusters(superclusters):
     num_spikes = superclusters.shape[0]
     num_KKs = superclusters.shape[1] #120 in this case
@@ -78,7 +155,7 @@ def reduce_supermasks_from_arrays(Ostart, Oend, I, K):
         end[i] = curend
     # step 3: convert into start, end
     #print(new_indices)
-   # embed()
+    #embed()
     sparse_indices = np.concatenate(new_indices, axis = 0)
     unique_superclusters, frequency = np.unique(start, return_counts = True)
     unique_superclusters_ends = np.unique(end)                                           
