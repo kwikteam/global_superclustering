@@ -28,4 +28,5 @@ default_parameters = dict(
      save_all_clu = False,
      embed = False,
      use_cluster_penalty = False,
+     save_prelogresponsibility = False,
      )

@@ -170,6 +170,8 @@ class KK(object):
         self.current_iteration = 0
         self.score_history = []
         self.cluster_distribution_history = []
+        if self.save_prelogresponsibility:
+            self.prelogresponsibility_history = []
     
     def iterate(self, recurse=True, score_target=-inf):        
         self.prepare_for_iterate()
@@ -415,6 +417,8 @@ class KK(object):
             #unbern[cluster,:,:]=bern[cluster,:,:]*len(self.get_spikes_in_cluster(cluster))
         self.log_bern = log_bern    
         self.prelogresponsibility = prelogresponsibility
+        if self.save_prelogresponsibility:
+            self.prelogresponsibility_history.append(self.prelogresponsibility)
         self.num_bern_params = num_bern_params
         #sumresponsibility = sum(preresponsibility, axis = 0)
         #responsibility = preresponsibility/sumresponsibility
