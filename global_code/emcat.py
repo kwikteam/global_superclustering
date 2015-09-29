@@ -202,9 +202,9 @@ class KK(object):
             old_score_penalty = score_penalty
             print('pre_compute_score',score, score_raw, score_penalty)
             score, score_raw, score_penalty = self.compute_score()
-            self.score_history.append((score, score_raw, score_penalty, 'post_deletion'))#,self.num_cluster_members))
-            print('score_history ', self.score_history)
-            self.cluster_distribution_history.append((self.num_cluster_members,'post_deletion'))
+            #self.score_history.append((score, score_raw, score_penalty, 'post_deletion'))#,self.num_cluster_members))
+            #print('score_history ', self.score_history)
+            #self.cluster_distribution_history.append((self.num_cluster_members,'post_deletion'))
             
             clusters_changed, = (self.clusters!=self.old_clusters).nonzero()
             clusters_changed = array(clusters_changed, dtype=int)
@@ -490,29 +490,66 @@ class KK(object):
         #embed()
         if improvement>0:
             # delete this cluster
-            print('WE ARE DELETING A CLUSTER')
+           # print('WE ARE DELETING A CLUSTER')
             num_points_in_candidate = sico[candidate_cluster+1]-sico[candidate_cluster]
-            self.log('info', 'Deleting cluster {cluster} ({numpoints} points): improves score '
+            #self.log('info', 'Deleting cluster {cluster} ({numpoints} points): improves score '
+            #                 'by {improvement}'.format(cluster=candidate_cluster,
+            #                                           numpoints=num_points_in_candidate,
+            #                                           improvement=improvement))
+            # reassign points
+            cursic = sic[sico[candidate_cluster]:sico[candidate_cluster+1]]
+            clustersk4 = self.clusters.copy()
+            clustersk4[cursic] = self.clusters_second_best[cursic]
+            
+            with section(self, 'deletion_evaluation'):
+                # will deletion really improve the score as the M-Step determined variables have now changed?
+                print('evaluation of deletion with K4')
+                K4 = self.copy(name='deletion_evaluation', map_log_to_debug=True)
+                #clusters = self.clusters.copy()
+                K4.initialise_clusters(clustersk4)
+                K4.prepare_for_iterate()
+                K4.MEC_steps(only_evaluate_current_clusters=True)
+                K4.compute_penalty()
+                score_aftermstepdel, raw_aftermstepdel, penalty_aftermstepdel  = K4.compute_score()
+                print('afterscore_del = ',score_aftermstepdel,raw_aftermstepdel,penalty_aftermstepdel)
+            #embed()
+            if score_aftermstepdel>new_score:
+                print('NO DELETION WILL OCCUR')
+                #self.clusters = self.old_clusters
+                self.score_history.append('score increase successfully averted!')
+                self.cluster_distribution_history.append('score increase sucessfully averted!')
+            else: 
+                print('WE ARE DELETING A CLUSTER')
+                self.clusters = K4.clusters.copy()
+                self.reindex_clusters()
+                self.log('info', 'Deleting cluster {cluster} ({numpoints} points): improves score '
                              'by {improvement}'.format(cluster=candidate_cluster,
                                                        numpoints=num_points_in_candidate,
                                                        improvement=improvement))
-            # reassign points
-            cursic = sic[sico[candidate_cluster]:sico[candidate_cluster+1]]
-            self.clusters[cursic] = self.clusters_second_best[cursic]
-            self.log_p_best[cursic] = self.log_p_second_best[cursic]
-            # at this point we have invalidated the partitions, so to make sure we don't miss
-            # something, we wipe them out here
-            self.partition_clusters()
-            self.compute_penalty() # and recompute the penalties
-            # we've also invalidated the second best log_p and clusters
-            self.log_p_second_best = None
-            self.clusters_second_best = None
-            # and we will need to do a full step next time
-            #self.force_next_step_full = True
-            postscore, postscore_raw, postscore_penalty = self.compute_score()
-            self.score_history.append((postscore, postscore_raw, postscore_penalty, 'post_deletion_lit'))#,self.num_cluster_members))
-            print('score_history ', self.score_history)
-            self.cluster_distribution_history.append((self.num_cluster_members,'post_deletion_lit'))
+                print('debug', 'Score improved after deleting cluster '
+                                  '%d ' % (candidate_cluster))
+                self.log('debug', 'Score improved after deleting cluster '
+                                  '%d ' % (candidate_cluster))                
+            ##self.log_p_best[cursic] = self.log_p_second_best[cursic]
+            ## at this point we have invalidated the partitions, so to make sure we don't miss
+            ## something, we wipe them out here
+            ##self.partition_clusters()
+            ##self.compute_penalty() # and recompute the penalties
+            ## we've also invalidated the second best log_p and clusters
+            ##self.log_p_second_best = None
+            ##self.clusters_second_best = None
+            ## and we will need to do a full step next time
+            ##self.force_next_step_full = True
+                #self.compute_penalty()
+                #postscore, postscore_raw, postscore_penalty = self.compute_score()
+                self.score_history.append(('improvement', improvement))
+                self.cluster_distribution_history.append(('improvement', improvement))
+                self.score_history.append((score_aftermstepdel, raw_aftermstepdel, penalty_aftermstepdel,'K4'))
+                #self.score_history.append((postscore, postscore_raw, postscore_penalty, 'post_deletionlit'))#,self.num_cluster_members))
+                print('score_history ', self.score_history)
+                self.cluster_distribution_history.append((K4.num_cluster_members,'K4'))
+                #self.cluster_distribution_history.append((self.num_cluster_members,'post_deletionlit'))
+                
 
     @add_slots
     def compute_score(self):
