@@ -190,17 +190,17 @@ class KK(object):
             self.compute_penalty() 
             estep_score, estep_score_raw, estep_score_penalty = self.compute_score()
             self.score_history.append((estep_score, estep_score_raw, estep_score_penalty, 'pure_e_step'))#,self.num_cluster_members))
-            print('score_history ', self.score_history)
+         #   print('score_history ', self.score_history)
             self.cluster_distribution_history.append((self.num_cluster_members, 'pure_e_step'))
             #embed()
             if recurse and self.consider_cluster_deletion and self.num_clusters_alive>2:
                 #embed()
-                print('recurse = ', recurse)
+         #       print('recurse = ', recurse)
                 self.consider_deletion()
             old_score = score
             old_score_raw = score_raw
             old_score_penalty = score_penalty
-            print('pre_compute_score',score, score_raw, score_penalty)
+         #   print('pre_compute_score',score, score_raw, score_penalty)
             score, score_raw, score_penalty = self.compute_score()
             #self.score_history.append((score, score_raw, score_penalty, 'post_deletion'))#,self.num_cluster_members))
             #print('score_history ', self.score_history)
@@ -415,8 +415,9 @@ class KK(object):
             #embed()
             
             #unbern[cluster,:,:]=bern[cluster,:,:]*len(self.get_spikes_in_cluster(cluster))
-        self.log_bern = log_bern    
-        self.prelogresponsibility = prelogresponsibility
+        if self.embed:    
+            self.log_bern = log_bern    
+            self.prelogresponsibility = prelogresponsibility
         if self.save_prelogresponsibility:
             self.prelogresponsibility_history.append(self.prelogresponsibility)
         self.num_bern_params = num_bern_params
@@ -477,16 +478,16 @@ class KK(object):
            # embed()
             new_penalty = self.compute_penalty(new_clusters)
             new_score = score_raw + deletion_loss[cluster] + new_penalty
-            print('SCORE_RAW', score_raw)
-            print('deletion_loss[%g] ='%cluster, deletion_loss[cluster])
-            print('new score =', new_score)
-            print('new_penalty = ', new_penalty)
+           # print('SCORE_RAW', score_raw)
+           # print('deletion_loss[%g] ='%cluster, deletion_loss[cluster])
+           # print('new score =', new_score)
+           # print('new_penalty = ', new_penalty)
             cur_improvement = score-new_score # we want improvement to be a positive value
             #embed()
             if cur_improvement>improvement:
                 improvement = cur_improvement
                 candidate_cluster = cluster
-            print('candidate_cluster ',    candidate_cluster)  
+          #  print('candidate_cluster ',    candidate_cluster)  
         #embed()
         if improvement>0:
             # delete this cluster
@@ -503,7 +504,7 @@ class KK(object):
             
             with section(self, 'deletion_evaluation'):
                 # will deletion really improve the score as the M-Step determined variables have now changed?
-                print('evaluation of deletion with K4')
+             #   print('evaluation of deletion with K4')
                 K4 = self.copy(name='deletion_evaluation', map_log_to_debug=True)
                 #clusters = self.clusters.copy()
                 K4.initialise_clusters(clustersk4)
@@ -511,13 +512,13 @@ class KK(object):
                 K4.MEC_steps(only_evaluate_current_clusters=True)
                 K4.compute_penalty()
                 score_aftermstepdel, raw_aftermstepdel, penalty_aftermstepdel  = K4.compute_score()
-                print('afterscore_del = ',score_aftermstepdel,raw_aftermstepdel,penalty_aftermstepdel)
+              #  print('afterscore_del = ',score_aftermstepdel,raw_aftermstepdel,penalty_aftermstepdel)
             #embed()
-            if score_aftermstepdel>new_score:
+            if score_aftermstepdel>score:
                 print('NO DELETION WILL OCCUR')
                 #self.clusters = self.old_clusters
-                self.score_history.append('score increase successfully averted!')
-                self.cluster_distribution_history.append('score increase sucessfully averted!')
+                self.score_history.append('score increase successfully averted, even though suggested improvement was %d!'%(improvement))
+                self.cluster_distribution_history.append('score increase successfully averted, even though suggested improvement was %d!'%(improvement))
             else: 
                 print('WE ARE DELETING A CLUSTER')
                 self.clusters = K4.clusters.copy()
@@ -555,7 +556,7 @@ class KK(object):
     def compute_score(self):
         #essential_params = self.num_clusters_alive*self.num_KKruns*(sum(self.D_k)-self.num_KKruns) #\sum_{k=1}^{num_KKruns} D(k)
         penalty = self.penalty
-        print('PENALTY', penalty)
+     #  print('PENALTY', penalty)
         raw = -2*sum(self.log_p_best) #Check this factor AIC = 2k-2log(L)
         #raw = 2*sum(self.log_p_best)
         score = raw+penalty
@@ -696,7 +697,7 @@ class KK(object):
                     #print('FAST SPLIT: score_target = ', score_target)
                     #score_target = unsplit_score
                 #else:
-                print('score_target = will be -inf')
+               # print('score_target = will be -inf')
                 score_target = -inf
 
                 try:
@@ -743,8 +744,8 @@ class KK(object):
                 K3.compute_penalty()
                 score_new, _, _ = K3.compute_score()
             
-            print('score_ref = ', score_ref)
-            print('score_new = ', score_new)
+          #  print('score_ref = ', score_ref)
+          #  print('score_new = ', score_new)
             if score_new<score_ref:
                 print('debug', 'Score improved after splitting, so splitting cluster '
                                   '%d into %d' % (cluster, num_clusters))
