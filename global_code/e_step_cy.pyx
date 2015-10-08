@@ -22,11 +22,10 @@ cpdef find_sublogresponsibility(floating[:,:] clust_sublogresponsibility,
     cdef numpy.ndarrray allkkrun_dims = numpy.arange(num_kkruns, dtype = numpy.int)
     cdef numpy.ndarrray origin_superclusters = numpy.zeros(num_kkruns, dtype = numpy.int)
     for p in range(num_spikes):        
-        #cdef numpy.ndarrray origin_superclusters = numpy.zeros(num_kkruns, dtype = numpy.int)
         origin_superclusters[supersparsekks[super_start[p]:super_end[p],0]] = supersparsekks[super_start[p]:super_end[p],1]
         #clust_sublogresponsibility[p] += numpy.sum(log_cluster_bern[:,origin_superclusters]) 
         clust_sublogresponsibility[p] += numpy.sum(log_cluster_bern[allkkrun_dims,origin_superclusters]) 
-        origin_superclusters = 0                
+        origin_superclusters[supersparsekks[super_start[p]:super_end[p],0]] = 0               
                                
                                
                                
