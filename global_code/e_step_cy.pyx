@@ -18,17 +18,15 @@ cpdef find_sublogresponsibility(floating[:,:] clust_sublogresponsibility,
                                integral[:] super_end,
                                integral num_spikes, 
                                integral num_kkruns ):
-    cdef integral p, k, i, d, kkrun, dlocal                               
-    for p in range(num_spikes):
-        nonzero_kkruns = supersparsekks[super_start[p]:super_end[p],0]
-        for k in range(num_kkruns):
-            if k not in nonzero_kkruns:
-                clust_sublogresponsibility[p] += log_cluster_bern[k,0]
-        num_nontrivial = super_end[p]-super_start[p]
-        for i in range(num_nontrivial):
-            kkrun = supersparsekks[super_start[p]+i,0]
-            dlocal = supersparsekks[super_start[p]+i,1]
-            clust_sublogresponsibility[p] += log_cluster_bern[kkrun, dlocal]                                
+    cdef integral p, k, i, d, kkrun, dlocal  
+    cdef numpy.ndarrray allkkrun_dims = numpy.arange(num_kkruns, dtype = numpy.int)
+    cdef numpy.ndarrray origin_superclusters = numpy.zeros(num_kkruns, dtype = numpy.int)
+    for p in range(num_spikes):        
+        #cdef numpy.ndarrray origin_superclusters = numpy.zeros(num_kkruns, dtype = numpy.int)
+        origin_superclusters[supersparsekks[super_start[p]:super_end[p],0]] = supersparsekks[super_start[p]:super_end[p],1]
+        #clust_sublogresponsibility[p] += numpy.sum(log_cluster_bern[:,origin_superclusters]) 
+        clust_sublogresponsibility[p] += numpy.sum(log_cluster_bern[allkkrun_dims,origin_superclusters]) 
+        origin_superclusters = 0                
                                
                                
                                
