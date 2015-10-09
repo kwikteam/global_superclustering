@@ -2,8 +2,8 @@ import numpy as np
 import time
 from IPython import embed
 from six.moves import range
-#from e_step_cy import *
-#find_sublogresponsibility
+from e_step_cy import *
+find_sublogresponsibility
 
 def sum_finite(nparray):
     finite_sum = np.sum(nparray[np.isfinite(nparray)])
@@ -27,8 +27,10 @@ def compute_cluster_subresponsibility(kk, cluster, weights, log_cluster_bern):
     
     #clust_subresponsibility = np.full(num_spikes,weights[cluster])
     filler = np.log(weights[cluster])- num_kkruns*np.log(num_spikes_in_cluster)
-    clust_sublogresponsibility = np.full(num_spikes,filler)
+    clust_sublogresponsibility = np.full(num_spikes,filler, dtype = np.float64)
+    print(clust_sublogresponsibility.shape)
     #print(filler)
+    #embed()
     start_time = time.time()
     
     
@@ -48,15 +50,17 @@ def compute_cluster_subresponsibility(kk, cluster, weights, log_cluster_bern):
        # if super_end[p]-super_start[p]> max_diff:
        #     max_diff = super_end[p]-super_start[p]
        #     print(p)
-       
-    origin_superclusters = np.zeros(num_kkruns, dtype = int)
-    allkkrun_dims = np.arange(num_kkruns, dtype = int)
     
-    for p in range(num_spikes):        
-        #origin_superclusters = np.zeros(num_kkruns, dtype = int)
-        origin_superclusters[supersparsekks[super_start[p]:super_end[p],0]] = supersparsekks[super_start[p]:super_end[p],1]
-        clust_sublogresponsibility[p] += np.sum(log_cluster_bern[allkkrun_dims,origin_superclusters])
-        origin_superclusters[supersparsekks[super_start[p]:super_end[p],0]] = 0
+    ##BEST PYTHON CODE so far---------------------------
+    #origin_superclusters = np.zeros(num_kkruns, dtype = int)
+    #allkkrun_dims = np.arange(num_kkruns, dtype = int)
+    
+    #for p in range(num_spikes):        
+        ##origin_superclusters = np.zeros(num_kkruns, dtype = int)
+        #origin_superclusters[supersparsekks[super_start[p]:super_end[p],0]] = supersparsekks[super_start[p]:super_end[p],1]
+        #clust_sublogresponsibility[p] += np.sum(log_cluster_bern[allkkrun_dims,origin_superclusters])
+        #origin_superclusters[supersparsekks[super_start[p]:super_end[p],0]] = 0
+    ##----------------------------------------------    
         
         #embed()
         #nonzero_kkruns = supersparsekks[super_start[p]:super_end[p],0]
@@ -67,7 +71,7 @@ def compute_cluster_subresponsibility(kk, cluster, weights, log_cluster_bern):
         #embed()
         #clust_subresponsibility[p] *= np.prod(cluster_bern[zero_kkruns,0])   
         #clust_subresponsibility[p] *= np.prod(cluster_bern[supersparsekks[super_start[p]:super_end[p],0],supersparsekks[super_start[p]:super_end[p],1]])
-  ##  find_sublogresponsibility(clust_sublogresponsibility,log_cluster_bern,supersparsekks, super_start, super_end, num_spikes,num_kkruns)
+    find_sublogresponsibility(clust_sublogresponsibility,log_cluster_bern,supersparsekks, super_start, super_end, num_spikes,num_kkruns)
         ##for k in np.arange(num_kkruns):
         #   # if k not in nonzero_kkruns:
         ##for k in zero_kkruns:    
