@@ -26,7 +26,8 @@ def compute_cluster_subresponsibility(kk, cluster, weights, log_cluster_bern):
     #prodexcludeself = np.prod(num_cluster_members)/num_spikes_in_cluster
     
     #clust_subresponsibility = np.full(num_spikes,weights[cluster])
-    filler = np.log(weights[cluster])- num_kkruns*np.log(num_spikes_in_cluster)
+    all_zero_sum = sum_finite(log_cluster_bern[:,0])
+    filler = np.log(weights[cluster])- num_kkruns*np.log(num_spikes_in_cluster) + all_zero_sum
     clust_sublogresponsibility = np.full(num_spikes,filler, dtype = np.float64)
     print(clust_sublogresponsibility.shape)
     #print(filler)

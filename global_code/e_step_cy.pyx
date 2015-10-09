@@ -23,16 +23,16 @@ cpdef find_sublogresponsibility(floating[:] clust_sublogresponsibility,
                                integral[:] super_end,
                                integral num_spikes, 
                                integral num_kkruns ):
-    cdef integral p, k, i, d, kkrun, dlocal, i1, i2
+    cdef integral p, i1
   #  cdef numpy.ndarray allkkrun_dims = numpy.arange(num_kkruns, dtype = numpy.int)
   #  cdef numpy.ndarray origin_superclusters = numpy.zeros(num_kkruns, dtype = numpy.int)
 
-    all_zero_sum = 0
-    for idx in range(num_kkruns):
-        if numpy.isfinite(log_cluster_bern[idx,0]):
-            all_zero_sum += log_cluster_bern[idx,0]
+   # all_zero_sum = 0
+    #for idx in range(num_kkruns):
+    #    if numpy.isfinite(log_cluster_bern[idx,0]):
+   #         all_zero_sum += log_cluster_bern[idx,0]
     for p in range(num_spikes):
-        clust_sublogresponsibility[p] += all_zero_sum
+        #clust_sublogresponsibility[p] += all_zero_sum
         i1 = super_start[p]
         while i1<super_end[p]:
             id0 = supersparsekks[i1,0]
