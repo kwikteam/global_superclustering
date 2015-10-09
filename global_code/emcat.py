@@ -2,11 +2,13 @@ from numpy import *
 from numpy.random import randint
 import hashlib
 from six import iteritems
+#from six.moves import range
 from logger import log_message
 #from hamming_maskstarts import hamming_maskstarts
 from compute_penalty import compute_penalty
 from m_step import compute_cluster_bern
-from e_step import compute_cluster_subresponsibility, compute_log_p_and_assign
+#from e_step import compute_cluster_subresponsibility, compute_log_p_and_assign
+from e_step import compute_subresponsibility, compute_log_p_and_assign
 # compute_cluster_bern
 from default_parameters import default_parameters
 import time
@@ -377,7 +379,7 @@ class KK(object):
         #bern = zeros((num_clusters, num_KKruns, max_Dk_size), dtype = float)
         num_bern_params = zeros(num_clusters, dtype = int)
         log_bern = zeros((num_clusters, num_KKruns, max_Dk_size), dtype = float)
-        prelogresponsibility = zeros((num_clusters, num_spikes), dtype = float)
+       # prelogresponsibility = zeros((num_clusters, num_spikes), dtype = float)
         #preresponsibility = zeros((num_clusters, num_spikes), dtype = float)
         ########### M step ########################################################
         # Normalize by total number of points to give class weight
@@ -410,10 +412,14 @@ class KK(object):
             
             #clustsublogresp, clustsubresp = compute_cluster_subresponsibility(self, cluster, weights, cluster_bern_norm, log_cluster_bern)  
             #preresponsibility[cluster, :] = clustsubresp
-            clustsublogresp = compute_cluster_subresponsibility(self, cluster, weights,  log_cluster_bern)  
-            prelogresponsibility[cluster, :] = clustsublogresp
-            #embed()
             
+            ## THIS WORKS OK -------------------------------------------------------
+            #clustsublogresp = compute_cluster_subresponsibility(self, cluster, weights,  log_cluster_bern)  
+            #prelogresponsibility[cluster, :] = clustsublogresp
+            ##------------------------------------------------------------------------
+            #embed()
+        
+        prelogresponsibility =  compute_subresponsibility(self, weights,  log_bern, num_clusters) 
             #unbern[cluster,:,:]=bern[cluster,:,:]*len(self.get_spikes_in_cluster(cluster))
         if self.embed:    
             self.log_bern = log_bern    

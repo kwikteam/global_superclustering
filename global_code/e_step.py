@@ -9,6 +9,33 @@ def sum_finite(nparray):
     finite_sum = np.sum(nparray[np.isfinite(nparray)])
     return finite_sum
 
+def compute_subresponsibility(kk, weights, log_bern,num_clusters):
+    data = kk.data
+    supersparsekks = data.supersparsekks
+    super_start = data.super_start
+    super_end = data.super_end
+    
+    num_kkruns = kk.num_KKruns
+    num_spikes = kk.num_spikes
+    num_cluster_members = kk.num_cluster_members
+    
+    prelogresponsibility = np.zeros((num_clusters, num_spikes), dtype = float)
+    
+    for cluster in range(num_clusters):
+        spikes = kk.get_spikes_in_cluster(cluster)
+        num_spikes_in_cluster = len(spikes) 
+        all_zero_sum = sum_finite(log_bern[cluster,:,0])
+        filler = np.log(weights[cluster])- num_kkruns*np.log(num_spikes_in_cluster) + all_zero_sum
+        prelogresponsibility[cluster,:] = np.full(num_spikes,filler, dtype = np.float64)
+    #print(clust_sublogresponsibility.shape)
+    #print(filler)
+    #embed()
+    start_time = time.time()
+    find_all_sublogresponsibility(prelogresponsibility,log_bern,supersparsekks, super_start, super_end, num_spikes,num_kkruns, num_clusters)
+    time_taken = time.time()-start_time
+    print('Time taken for computing full prelogresponsibility %.2f s' %(time_taken))   
+    return prelogresponsibility
+    
 def compute_cluster_subresponsibility(kk, cluster, weights, log_cluster_bern):
     '''compute the numerator of the responsibilities
        log_cluster_bern.shape = (num_ '''
