@@ -7,6 +7,7 @@ def compute_penalty(kk, clusters):
       and computes the penalty'''
       if clusters is None:
           clusters = kk.clusters
+      #print(clusters)
       num_cluster_membs = np.array(np.bincount(clusters), dtype=int)
       alive = num_cluster_membs>0
       num_clusters = np.sum(alive)

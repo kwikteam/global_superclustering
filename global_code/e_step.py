@@ -120,7 +120,7 @@ def compute_cluster_subresponsibility(kk, cluster, weights, log_cluster_bern):
     #print('mean_start_end = ', mean_start_end)
      
     return clust_sublogresponsibility
-
+#add old to retire of function below
 def compute_log_p_and_assign(kk, prelogresponsibility, 
                              only_evaluate_current_clusters):
     num_clusters = len(kk.num_cluster_members)
@@ -154,6 +154,33 @@ def compute_log_p_and_assign(kk, prelogresponsibility,
         #    p = candidates[pp]        
         #Fix bug where log_p_second_best is -inf
         orderfrombest = np.argsort(-prelogresponsibility[:,p])
+        
+        ##find first and second best --------------------------------------------------
+        #sortbest = 0
+        #secondsortbest = 1
+        ##smallest = -prelogresponsibility[0,p]
+        ##secondsmallest = -prelogresponsibility[1,p]
+        #if -prelogresponsibility[1,p] < -prelogresponsibility[0,p]:
+            #sortbest = 1
+            #secondsortbest = 0
+        #for i in range(2,num_clusters):
+            #if -prelogresponsibility[i,p]< -prelogresponsibility[secondsortbest,p]:
+                #if -prelogresponsibility[i,p]< -prelogresponsibility[sortbest,p]:
+                    #secondsortbest = sortbest   
+                    #sortbest = i  
+                #else:
+                    #secondsortbest = i
+        #print('sortbest = ', sortbest)
+        #print('secondsortbest = ', secondsortbest)
+        #print('orderfrombest[0] = ',orderfrombest[0])      
+        #print('orderfrombest[1] = ',orderfrombest[1])
+        #if sortbest !=orderfrombest[0]:
+            #print('first ordering not working!', -prelogresponsibility[sortbest,p],-prelogresponsibility[orderfrombest[0],p])
+        #if secondsortbest !=orderfrombest[1]:
+            #print('second ordering not working!', -prelogresponsibility[secondsortbest,p],-prelogresponsibility[orderfrombest[1],p]) 
+            #embed()
+        ##----------------------------------------------------------------------------------
+        
         #print('prelogresponsibility[:,p],shape = ',prelogresponsibility[:,p].shape)
         #e.g. for a clustering with 15 clusters
         # prelogresponsibility[:,p]=
@@ -279,4 +306,33 @@ def compute_log_p_and_assign(kk, prelogresponsibility,
                                 #'will be full')
 
     #return kk.num_spikes-num_spikes
+
+#get rid of new to make this the function used    
+def compute_log_p_and_assign_new(kk, prelogresponsibility, 
+                             only_evaluate_current_clusters):
+    num_clusters = len(kk.num_cluster_members)
+    num_kkruns = kk.num_KKruns
+    num_spikes = kk.num_spikes
+
+    data = kk.data
+    supersparsekks = data.supersparsekks
+    super_start = data.super_start
+    super_end = data.super_end
+
+    log_p_best = kk.log_p_best
+    log_p_second_best = kk.log_p_second_best
+    
+    clusters = kk.clusters
+    clusters_second_best = kk.clusters_second_best
+    old_clusters = kk.old_clusters
+    log_p = np.zeros(num_spikes) 
+    
+    do_p_loop_log_p_and_assign(prelogresponsibility,log_p, log_p_best, log_p_second_best, clusters, clusters_second_best, num_spikes, num_clusters,\
+                     only_evaluate_current_clusters)
+    
+    kk.log_p_best = log_p_best
+    kk.log_p_second_best = log_p_second_best
+    kk.clusters = clusters
+    kk.clusters_second_best = clusters_second_best
+    
 ##def compute_responsibilities(kk, cluster, weights, bern):
