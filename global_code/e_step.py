@@ -3,7 +3,7 @@ import time
 from IPython import embed
 from six.moves import range
 from e_step_cy import *
-find_sublogresponsibility
+#find_sublogresponsibility
 
 def sum_finite(nparray):
     finite_sum = np.sum(nparray[np.isfinite(nparray)])
@@ -33,7 +33,7 @@ def compute_subresponsibility(kk, weights, log_bern,num_clusters):
     start_time = time.time()
     find_all_sublogresponsibility(prelogresponsibility,log_bern,supersparsekks, super_start, super_end, num_spikes,num_kkruns, num_clusters)
     time_taken = time.time()-start_time
-    print('Time taken for computing full prelogresponsibility %.2f s' %(time_taken))   
+    print('Time taken for computing full prelogresponsibility for a loop over (%d) clusters is %.2f s' %(num_clusters, time_taken))   
     return prelogresponsibility
     
 def compute_cluster_subresponsibility(kk, cluster, weights, log_cluster_bern):
