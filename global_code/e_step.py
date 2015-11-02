@@ -121,7 +121,7 @@ def compute_cluster_subresponsibility(kk, cluster, weights, log_cluster_bern):
      
     return clust_sublogresponsibility
 #add old to retire of function below
-def compute_log_p_and_assign(kk, prelogresponsibility, 
+def compute_log_p_and_assign_old(kk, prelogresponsibility, 
                              only_evaluate_current_clusters):
     num_clusters = len(kk.num_cluster_members)
     num_kkruns = kk.num_KKruns
@@ -308,7 +308,7 @@ def compute_log_p_and_assign(kk, prelogresponsibility,
     #return kk.num_spikes-num_spikes
 
 #get rid of new to make this the function used    
-def compute_log_p_and_assign_new(kk, prelogresponsibility, 
+def compute_log_p_and_assign(kk, prelogresponsibility, 
                              only_evaluate_current_clusters):
     num_clusters = len(kk.num_cluster_members)
     num_kkruns = kk.num_KKruns
