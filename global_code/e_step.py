@@ -31,7 +31,8 @@ def compute_subresponsibility(kk, weights, log_bern,num_clusters):
     #print(filler)
     #embed()
     start_time = time.time()
-    find_all_sublogresponsibility(prelogresponsibility,log_bern,supersparsekks, super_start, super_end, num_spikes,num_kkruns, num_clusters)
+    numpy_inf = np.inf
+    find_all_sublogresponsibility(prelogresponsibility,log_bern,supersparsekks, super_start, super_end, num_spikes,num_kkruns, num_clusters, numpy_inf)
     time_taken = time.time()-start_time
     print('Time taken for computing full prelogresponsibility for a loop over (%d) clusters is %.2f s' %(num_clusters, time_taken))   
     return prelogresponsibility
@@ -327,8 +328,13 @@ def compute_log_p_and_assign(kk, prelogresponsibility,
     old_clusters = kk.old_clusters
     log_p = np.zeros(num_spikes) 
     
+    numpy_inf = np.inf
+    prelogshape_below_two = False
+    if prelogresponsibility.shape[0] == 1:
+        prelogshape_below_two = True
+    
     do_p_loop_log_p_and_assign(prelogresponsibility,log_p, log_p_best, log_p_second_best, clusters, clusters_second_best, num_spikes, num_clusters,\
-                     only_evaluate_current_clusters)
+                     only_evaluate_current_clusters, prelogshape_below_two, numpy_inf)
     
     kk.log_p_best = log_p_best
     kk.log_p_second_best = log_p_second_best

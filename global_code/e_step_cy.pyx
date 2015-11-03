@@ -93,13 +93,14 @@ cpdef do_p_loop_log_p_and_assign(floating[:,:] prelogresponsibility,
                               integral num_spikes,
                               integral num_clusters,
                               char only_evaluate_current_clusters,
-                              ):
-    cdef integral pp, p, sortbest, secondsortbest
+                              char prelogshape_below_two,
+                               floating numpy_inf):
+    cdef integral i, pp, p, sortbest, secondsortbest
     cdef floating cur_log_p_best, cur_log_p_second_best
-    for pp in range(num_spikes):
+    for pp in prange(num_spikes, nogil=True):
         p = pp
-        if len(prelogresponsibility[:,p])<2:
-            orderfrombest = [0]
+        if prelogshape_below_two: #len(prelogresponsibility[:,p])<2
+           sortbest = 0  #orderfrombest = [0]
         else:    
             sortbest = 0
             secondsortbest = 1
@@ -115,14 +116,14 @@ cpdef do_p_loop_log_p_and_assign(floating[:,:] prelogresponsibility,
                         sortbest = i  
                     else:
                         secondsortbest = i
-            orderfrombest = [sortbest, secondsortbest]            
+           # orderfrombest = [sortbest, secondsortbest]            
   
         #print(sortbest, secondsortbest)
         #print(prelogresponsibility[sortbest,p],prelogresponsibility[secondsortbest,p])
         
         #orderfrombest = np.argsort(-prelogresponsibility[:,p])
         
-        log_p[p] = prelogresponsibility[orderfrombest[0],p]
+        log_p[p] = prelogresponsibility[sortbest,p]
         cur_log_p_best = log_p_best[p]
         if not only_evaluate_current_clusters:
             cur_log_p_second_best = log_p_second_best[p]
@@ -138,16 +139,17 @@ cpdef do_p_loop_log_p_and_assign(floating[:,:] prelogresponsibility,
                 #cluster assignment for point p does not change    
             else:    
                 log_p_best[p] = log_p[p] 
-                if not (len(orderfrombest) <2) and (prelogresponsibility[orderfrombest[1],p] > -numpy.inf):#np.isfinite(prelogresponsibility[orderfrombest[1],p]):       
-                    log_p_second_best[p] = prelogresponsibility[orderfrombest[1],p] #prelogresponsibility[orderfrombest[1],p]
+                #if not (len(orderfrombest) <2) and (prelogresponsibility[orderfrombest[1],p] > -numpy_inf):#np.isfinite(prelogresponsibility[orderfrombest[1],p]):     
+                if not prelogshape_below_two and (prelogresponsibility[secondsortbest,p] > -numpy_inf):#np.isfinite(prelogresponsibility[orderfrombest[1],p]): 
+                    log_p_second_best[p] = prelogresponsibility[secondsortbest,p] #prelogresponsibility[orderfrombest[1],p]
                 else: 
-                    log_p_second_best[p] = prelogresponsibility[orderfrombest[0],p] #prelogresponsibility[orderfrombest[0],p]
-                clusters[p] = orderfrombest[0]
+                    log_p_second_best[p] = prelogresponsibility[sortbest,p] #prelogresponsibility[orderfrombest[0],p]
+                clusters[p] = sortbest #orderfrombest[0]
                 #clusters reassigned due to improvement 
                 #print('clusters being reassigned') 
-                if not (len(orderfrombest) <2):
+                if not prelogshape_below_two:
                 #if (secondsortbest is None):#sortbest != secondsortbest:
-                    clusters_second_best[p] = orderfrombest[1]
+                    clusters_second_best[p] = secondsortbest #orderfrombest[1]
         else:
             log_p_best[p] = log_p[p]           
                                
