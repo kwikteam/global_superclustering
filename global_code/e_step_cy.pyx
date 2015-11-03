@@ -9,6 +9,8 @@ cimport numpy
 
 from cython cimport integral, floating
 
+from cython.parallel import prange
+
 from libcpp.vector cimport vector
 
 cpdef sum_finite(nparray):
@@ -50,7 +52,8 @@ cpdef find_all_sublogresponsibility(floating[:,:] prelogresponsibility,
                                integral[:] super_end,
                                integral num_spikes, 
                                integral num_kkruns,
-                               integral num_clusters):
+                               integral num_clusters,
+                               floating numpy_inf):
     cdef integral p, i1, id0, id1, cluster
   #  cdef numpy.ndarray allkkrun_dims = numpy.arange(num_kkruns, dtype = numpy.int)
   #  cdef numpy.ndarray origin_superclusters = numpy.zeros(num_kkruns, dtype = numpy.int)
@@ -59,7 +62,8 @@ cpdef find_all_sublogresponsibility(floating[:,:] prelogresponsibility,
     #for idx in range(num_kkruns):
     #    if numpy.isfinite(log_cluster_bern[idx,0]):
    #         all_zero_sum += log_cluster_bern[idx,0]
-    for p in range(num_spikes):
+    for p in prange(num_spikes, nogil=True):
+    #for p in range(num_spikes):
         #clust_sublogresponsibility[p] += all_zero_sum
         
         i1 = super_start[p]
@@ -69,7 +73,7 @@ cpdef find_all_sublogresponsibility(floating[:,:] prelogresponsibility,
             id1 = supersparsekks[i1,1]
             for cluster in range(num_clusters):
                 prelogresponsibility[cluster,p] += log_bern[cluster,id0,id1]
-                if log_bern[cluster,id0,0]>-numpy.inf:
+                if log_bern[cluster,id0,0]>-numpy_inf: # numpy_inf = numpy.inf
                 #if numpy.isfinite(log_bern[cluster,id0,0]):
                     prelogresponsibility[cluster,p] -= log_bern[cluster,id0,0]
             #i1 += 1        
