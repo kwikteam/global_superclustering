@@ -78,6 +78,12 @@ def add_clustering_to_kwik(kwik_path_dir, filename, clustering_name, clu_array):
     model = KwikModel(basename)
     model.add_clustering(clustering_name, clu_array)
 
+def retrieve_res_file_from_kwik(kwik_path_dir, filename, filepath):
+    basename =    os.path.join(kwik_path_dir, filename)
+    model = KwikModel(basename)
+    samps = model.spike_samples
+    write_res(samps, filepath)
+
 def write_mask(mask, filename, fmt="%f"):
     fd = open(filename, 'w')
     fd.write(str(mask.shape[1])+'\n') # number of features
@@ -97,6 +103,30 @@ def write_fet(feats, filepath, fmt = "%f"):
     #np.savetxt(feat_file, feats, fmt="%i")
     np.savetxt(feat_file, feats, fmt=fmt)
     feat_file.close()  
+
+def write_clu(clus, filepath, fmt = "%i"):
+    '''write a clu file
+    input: clus is a 1d or 2D numpy array of integers
+    output: 
+        top line: number of clusters (max cluster)
+        mext lines: one integer per line
+    '''
+    clu_file = open(filepath, 'w')
+    n_clu = clus.max()+1
+    clu_file.write('%i\n'%n_clu)
+    clu_file.close()
+    clu_file = open(filepath, 'ab')
+    #one cluster per line
+    np.savetxt(clu_file, np.int16(clus), fmt = fmt)
+    clu_file.close()
+    
+def write_res(samples, filepath, fmt = "%i"):
+    '''input: 1D vector of times, shape = (n_times,) or (n_times, 1)
+    output: writes .res file, which has integer sample numbers
+    '''    
+    res_file = open(filepath, 'ab')
+    np.savetxt(res_file, samples, fmt = fmt)
+    res_file.close()
 
 def make_KK2script(KKparams, filebase, shanknum,  scriptname):
     
