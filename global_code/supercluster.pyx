@@ -97,4 +97,29 @@ cpdef clump_clustering(integral[:] clusters,
                 best_id = best_ids[randint(best_ids.size())]   #if there are many equidistant superclusters, take a random one
                 #print(best_id)
                 clusters[p] = cand_cluster_label[best_id]
-  #  return clusters           
+  #  return clusters 
+  
+cpdef noisedump_clustering(integral[:] clusters,
+             integral[:] candidate_ids_start,
+             integral[:] candidate_ids_end,#self.biggersupercluster_indict[155]
+                     integral[:,:] supersparsekks,
+                     integral[:] superstart,
+                     integral[:] superend,
+                     integral[:] allspikes,
+                     integral numKKs,
+                     dict cand_cluster_label,
+                     ):
+    
+    cdef integral p, candidate_id, candidate_end, noisedump_cluster_id
+    #found = dict()
+    #end = dict()
+    noisedump_cluster_id = len(candidate_ids_start)
+    for p in allspikes:
+        #supermask_startid = superstart[p]
+        if superstart[p] in candidate_ids_start:
+            # This spike belongs to one of the big superclusters already
+            clusters[p] = cand_cluster_label[superstart[p]]
+        else: # we just dump it in an extra cluster
+                clusters[p] = noisedump_cluster_id
+  #  return clusters      
+  
