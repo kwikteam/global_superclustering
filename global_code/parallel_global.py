@@ -119,6 +119,12 @@ def write_clu(clus, filepath, fmt = "%i"):
     #one cluster per line
     np.savetxt(clu_file, np.int16(clus), fmt = fmt)
     clu_file.close()
+
+def load_clu(fname):
+    return np.loadtxt(fname, skiprows=1, dtype=int)-1
+
+def load_res(fname):
+    return np.loadtxt(fname, dtype=int)
     
 def write_res(samples, filepath, fmt = "%i"):
     '''input: 1D vector of times, shape = (n_times,) or (n_times, 1)
@@ -153,6 +159,32 @@ def make_KK2script(KKparams, filebase, shanknum,  scriptname):
     os.system(changeperms)
     
     return scriptstring    
+
+def make_KKscript(KKparams, filebase, scriptname):
+    
+    keylist = KKparams['keylist']
+    #keylist = ['MaskStarts','MaxPossibleClusters','FullStepEvery','MaxIter','RandomSeed',
+    #           'Debug','SplitFirst','SplitEvery','PenaltyK','PenaltyKLogN','Subset',
+    #           'PriorPoint','SaveSorted','SaveCovarianceMeans','UseMaskedInitialConditions',
+     #          'AssignToFirstClosestMask','UseDistributional']
+
+    #KKlocation = '/martinottihome/skadir/GIT_masters/klustakwik/MaskedKlustaKwik'  
+    KKlocation = KKparams['KKlocation']
+    shanknum = KKparams['shanknum']
+    scriptstring = KKlocation + ' '+ filebase + ' %g '%(shanknum)
+    for KKey in keylist: 
+        #print '-'+KKey +' '+ str(KKparams[KKey])
+        scriptstring = scriptstring + ' -'+ KKey +' '+ str(KKparams[KKey])
+    
+    print(scriptstring)
+    scriptfile = open('%s.sh' %(scriptname),'w')
+    scriptfile.write(scriptstring)
+    scriptfile.close()
+    changeperms='chmod 777 %s.sh' %(scriptname)
+    os.system(changeperms)
+    
+    return scriptstring
+
     
 def pca_licate_indices(channel_list, num_pcs):
     ordered_chanlist = np.sort(channel_list)
@@ -206,15 +238,17 @@ def make_inverse_dict(dictionaer):
     '''Only works for a bijective dictionary'''
     inv_dict = {v:k for k, v in dictionaer.items()}
     
-def find_unmasked_points_for_channel(masks,channel_order_dict,fulladj,globalcl_dict): 
+def find_unmasked_points_for_channel(masks,channel_order_dict,fulladj,globalcl_dict, threshold=None): 
     '''For each channel find the indices of the points
      which are unmasked on this channel 
      fulladj = full_adjacency
      masks - array of masks'''
-
+    
+    if threshold == None:
+        threshold =0
     globalcl_dict.update({'unmasked_indices':{}})
     for channel in fulladj.keys():
-        unmasked = np.where(masks[:,channel_order_dict[channel]]!= 0)
+        unmasked = np.where(masks[:,channel_order_dict[channel]]> threshold)
         globalcl_dict['unmasked_indices'].update({channel:unmasked})
     return globalcl_dict    
         #print(model.probe.adjacency[channel])    
@@ -231,7 +265,7 @@ def find_unmasked_spikegroup(fulladj,globalcl_dict):
         globalcl_dict['unmasked_spikegroup'].update({channel:unmaskedunion})  
     return globalcl_dict
                
-def make_subset_fetmask(fetmask_dict, fetty, triplemasky, channel_order_dict,fulladj, globalcl_dict, writefetmask = False):
+def make_subset_fetmask(fetmask_dict, fetty, triplemasky, channel_order_dict,fulladj, globalcl_dict, writefetmask = False, basename = None):
     '''No longer necessary with the new subset feature in KK2,
     but kept here in case. Make .fet and .fmask files for the
     subsets'''  
@@ -267,6 +301,12 @@ def make_subset_fetmask(fetmask_dict, fetty, triplemasky, channel_order_dict,ful
 def run_subset_KK(kkobj):
     #supercluster_info['kk_sub'][channel]
     kkobj.cluster_mask_starts()
+    superclust_par = kkobj.clusters  
+    return superclust_par
+
+def run_subset_random_KK(kkobj):
+    #supercluster_info['kk_sub'][channel]
+    kkobj.cluster_random_starts()
     superclust_par = kkobj.clusters  
     return superclust_par
 
