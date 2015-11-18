@@ -237,6 +237,10 @@ def make_channel_order_dict(chorder):
 def make_inverse_dict(dictionaer):
     '''Only works for a bijective dictionary'''
     inv_dict = {v:k for k, v in dictionaer.items()}
+
+def give_value(dictionaer,k):
+    v = dictionaer[k]
+    return v
     
 def find_unmasked_points_for_channel(masks,channel_order_dict,fulladj,globalcl_dict, threshold=None): 
     '''For each channel find the indices of the points
@@ -264,6 +268,38 @@ def find_unmasked_spikegroup(fulladj,globalcl_dict):
         unmaskedunion = np.array(unmaskedunion, dtype = np.int32)    
         globalcl_dict['unmasked_spikegroup'].update({channel:unmaskedunion})  
     return globalcl_dict
+
+def filter_spike_groups(masks,channel_order_dict,fulladj,globalcl_dict, filter_thresh):
+    '''
+    computer the intersection of the fmask of every spike  assigned to a spike group by
+    the function find_unmasked_spikegroup() above, with the set of channels
+    composing the group.
+    
+        X   X   X   X                   S_i  Intersection   Participation
+    ----------------------------------|     |     
+    1   1   1   0   0   0   0   0   0 |  3  |     2             Y
+    0   0   1   1   1   1   1   0   0 |  5  |     3             Y
+    0   0   1   0   0   0   0   0   0 |  1  |     1             Y
+    0   0   0   0   1   1   1   1   1 |  5  |     1             N
+    
+    '''
+    
+    for channelgp in fulladj.keys():
+        spikegroup_chans = fulladj[channelgp]
+        filtered_unmasked = []
+        for spike_ind in globalcl_dict['unmasked_spikegroup'][channelgp]:
+            masky = masks[spike_ind]
+            ordchans = []
+            for chan in spikegroup_chans:
+                ordchans.append(channel_order_dict[chan])
+            intersect_no = np.sum(masky[ordchans])
+            total_mask_length = np.sum(masks[spike_ind])
+            if (intersect_no>filter_thresh):
+                filtered_unmasked.append(spike_ind)
+            elif (total_mask_length <=filter_thresh):
+                filtered_unmasked.append(spike_ind)
+        globalcl_dict['unmasked_spikegroup'].update({channelgp:filtered_unmasked})
+    return globalcl_dict    
                
 def make_subset_fetmask(fetmask_dict, fetty, triplemasky, channel_order_dict,fulladj, globalcl_dict, writefetmask = False, basename = None):
     '''No longer necessary with the new subset feature in KK2,
