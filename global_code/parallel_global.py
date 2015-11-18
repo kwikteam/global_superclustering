@@ -248,7 +248,7 @@ def find_unmasked_points_for_channel(masks,channel_order_dict,fulladj,globalcl_d
         threshold =0
     globalcl_dict.update({'unmasked_indices':{}})
     for channel in fulladj.keys():
-        unmasked = np.where(masks[:,channel_order_dict[channel]]> threshold)
+        unmasked = np.where(masks[:,channel_order_dict[channel]]>= threshold)
         globalcl_dict['unmasked_indices'].update({channel:unmasked})
     return globalcl_dict    
         #print(model.probe.adjacency[channel])    
