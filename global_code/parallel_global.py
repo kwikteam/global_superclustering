@@ -249,7 +249,7 @@ def find_unmasked_points_for_channel(masks,channel_order_dict,fulladj,globalcl_d
      masks - array of masks'''
     
     if threshold == None:
-        threshold =0
+        threshold =0.001
     globalcl_dict.update({'unmasked_indices':{}})
     for channel in fulladj.keys():
         unmasked = np.where(masks[:,channel_order_dict[channel]]>= threshold)
@@ -273,20 +273,22 @@ def filter_spike_groups(masks,channel_order_dict,fulladj,globalcl_dict, filter_t
     '''
     computer the intersection of the fmask of every spike  assigned to a spike group by
     the function find_unmasked_spikegroup() above, with the set of channels
-    composing the group.
+    composing the group. Eg. for filter_thresh =2:
     
-        X   X   X   X                   S_i  Intersection   Participation
-    ----------------------------------|     |     
-    1   1   1   0   0   0   0   0   0 |  3  |     2             Y
-    0   0   1   1   1   1   1   0   0 |  5  |     3             Y
-    0   0   1   0   0   0   0   0   0 |  1  |     1             Y
-    0   0   0   0   1   1   1   1   1 |  5  |     1             N
+      |  X   X   X   X |                  S_i  Intersection   Participation
+    ------------------------------------|-----|-------------|---------------     
+    1 |  1   1   0   0 |  0   0   0   0 |  3  |     2       |     Y
+    0 |  0   1   1   1 |  1   1   0   0 |  5  |     3       |     Y
+    0 |  0   1   0   0 |  0   0   0   0 |  1  |     1       |     Y
+    0 |  0   0   0 0.5 |  1   1   1   1 | 4.5 |     1       |     N
     
+    (note masks needn't be integers)
     '''
     
     for channelgp in fulladj.keys():
         spikegroup_chans = fulladj[channelgp]
         filtered_unmasked = []
+        print('num spikes in group %g = ' %(channelgp), len(globalcl_dict['unmasked_spikegroup'][channelgp]))
         for spike_ind in globalcl_dict['unmasked_spikegroup'][channelgp]:
             masky = masks[spike_ind]
             ordchans = []
@@ -294,11 +296,14 @@ def filter_spike_groups(masks,channel_order_dict,fulladj,globalcl_dict, filter_t
                 ordchans.append(channel_order_dict[chan])
             intersect_no = np.sum(masky[ordchans])
             total_mask_length = np.sum(masks[spike_ind])
-            if (intersect_no>filter_thresh):
+            if (intersect_no>=filter_thresh):
                 filtered_unmasked.append(spike_ind)
             elif (total_mask_length <=filter_thresh):
                 filtered_unmasked.append(spike_ind)
+            elif np.any(masky[ordchans] ==1):
+                filtered_unmasked.append(spike_ind) #fix bug where spikes were excluded altogether from all kkruns
         globalcl_dict['unmasked_spikegroup'].update({channelgp:filtered_unmasked})
+        print('num spikes in group %g after filtering = ' %(channelgp), len(globalcl_dict['unmasked_spikegroup'][channelgp]))
     return globalcl_dict    
                
 def make_subset_fetmask(fetmask_dict, fetty, triplemasky, channel_order_dict,fulladj, globalcl_dict, writefetmask = False, basename = None):
