@@ -185,7 +185,7 @@ def make_KKscript(KKparams, filebase, scriptname):
     
     return scriptstring
 
-def make_KKscript_supercomp(KKparams, filebase, scriptname, supercomparams):
+def make_KKscript_supercomp(KKparams, filebase, scriptname, supercomparams, localoutputpath, sendonlyscript = False):
     '''Create bash script on Legion required to run KlustaKwik
     supercomparams = {'time':'36:00:00','mem': '2G', 'tmpfs':'10G'}
     
@@ -216,18 +216,23 @@ cd $TMPDIR
         #print '-'+KKey +' '+ str(KKparams[KKey])
         scriptstring = scriptstring + ' -'+ KKey +' '+ str(KKparams[KKey])
     
-    print scriptstring
-    scriptfile = open('%s.sh' %(scriptfilebase),'w')
+    print(scriptstring)
+    scriptfile = open('%s/%s.sh' %(localoutputpath, scriptfilebase),'w')
     scriptfile.write(scriptstring)
     scriptfile.close()
     #outputdir = ' /chandelierhome/skadir/hybrid_analysis/mariano/'
     #changeperms='chmod 777 %s.sh' %(scriptname)
-    #sendout = 'scp -r'+ outputdir + scriptfilebase + '.sh' + outputdir +scriptname + '.fet.1' + outputdir + scriptname + '.fmask.1 '+ 'smgxsk1@legion.rc.ucl.ac.uk:/home/smgxsk1/Scratch/'
-    #os.system(sendout)
+    if sendonlyscript:
+        sendout = 'scp '+ localoutputpath + scriptfilebase + '.sh '+ 'smgxsk1@legion.rc.ucl.ac.uk:/home/smgxsk1/Scratch/global/'
+    else:    
+        sendout = 'scp '+ localoutputpath + scriptfilebase + '.sh ' +\
+    localoutputpath +scriptname + '.fet.1 ' + localoutputpath + scriptname + '.fmask.1 '+ 'smgxsk1@legion.rc.ucl.ac.uk:/home/smgxsk1/Scratch/global/'
+    print(sendout)
+    os.system(sendout)
     
     return scriptstring
 
-def run_on_supercomp_ind(outlist):
+def run_on_supercomp_ind(outlist, kkgroupname, localoutputpath):
     #if kwik ==False:
     #    if outlist ==None:
      #       outlist = rkk.one_param_varyKK_ind(hybdatadict, SDparams, defaultKKparams, paramtochange, listparamvalues) 
@@ -238,50 +243,47 @@ def run_on_supercomp_ind(outlist):
     outputdir = '/home/smgxsk1/Scratch/global/'
     qsubscript = '''import os
 os.system(\''''
-    for k, basefilename in enumerate(outlist[0]):
+    for k, basefilename in enumerate(outlist):
+        #qsubscriptn = qsubscript +  basefilename + '.fet.1'
+        #qsubscriptn = qsubscript +  basefilename + '.fmask.1'
         #qsubscript = qsubscript + 'ln -s %s.fet.%g %s.fet.%g; ' %(outlist[0][0][:-33],defaultKKparams['shanknum'],basefilename,defaultKKparams['shanknum'])
         #qsubscript = qsubscript + 'ln -s %s.fmask.%g %s.fmask.%g; ' %(outlist[0][0][:-33],defaultKKparams['shanknum'],basefilename,defaultKKparams['shanknum'])
         qsubscript = qsubscript + 'qsub '+ outputdir + 'super_' + basefilename + '_comp.sh; ' 
         
     
     qsubscript = qsubscript + '\')'
-    qsubscriptname = outlist[0][0][:-33]
-    qsubfilename = hybdatadict['output_path']+'%s_%s_submission.py' %(qsubscriptname,extralabel)
+    qsubscriptname = kkgroupname
+    qsubfilename = localoutputpath+'%s_submission.py' %(qsubscriptname)
     scriptfile = open(qsubfilename,'w')
     scriptfile.write(qsubscript)
     scriptfile.close()
-    print 'Creating qsub script: ', qsubfilename
-    print 'Sending it to Legion '
-    print qsubscript
+    print('Creating qsub script: ', qsubfilename)
+    print('Sending it to Legion ')
+    print(qsubscript)
     sendout = 'scp '+ qsubfilename+ ' smgxsk1@legion.rc.ucl.ac.uk:/home/smgxsk1/Scratch/global/'
     os.system(sendout)
     
     
 
     
-def retrieve_from_supercomp( defaultKKparams,outlist = None):
-    #if kwik ==False:
-    #    outlist = rkk.one_param_varyKK_ind(hybdatadict, SDparams, defaultKKparams, paramtochange, listparamvalues) 
-    #else:
-    #    outlist = rkk.one_param_varyKK_ind_kwik(hybdatadict, SDparams, defaultKKparams, paramtochange, listparamvalues,kwik) 
-    if outlist == None:
-        outlistKK = rkk.one_param_varyKK_ind(hybdatadict, SDparams, defaultKKparams, paramtochange, listparamvalues) 
-    outputdir = '/home/smgxsk1/Scratch/'
+def retrieve_from_supercomp(outlist, kkgroupname, localoutputpath):
+    
+    outputdir = '/home/smgxsk1/Scratch/global/'
     bringback = '''import os
 os.system(\''''
-    for k, basefilename in enumerate(outlistKK[0]):
+    for k, basefilename in enumerate(outlist):
         bringback = bringback + 'scp '+ outputdir + basefilename + '.clu.1 ' + outputdir + basefilename + '.klg.1 ' 
         
-    bringback = bringback + 'skadir@chandelier.cortexlab.net:' + hybdatadict['output_path'] + '\')'
-    retrievalscriptname = outlistKK[0][0][:-33]
-    retrievefilename = hybdatadict['output_path']+'%s_%s_retrieve.py' %(retrievalscriptname,extralabel)
+    bringback = bringback + 'skadir@chandelier.cortexlab.net:' + localoutputpath + '\')'
+    retrievalscriptname = kkgroupname
+    retrievefilename = localoutputpath+'%s_retrieve.py' %(retrievalscriptname)
     scriptfile = open(retrievefilename,'w')
     scriptfile.write(bringback)
     scriptfile.close()
-    print 'Creating retrieval script: ', retrievefilename
-    print 'Sending it to Legion '
-    print bringback
-    sendout = 'scp '+ retrievefilename+ ' smgxsk1@legion.rc.ucl.ac.uk:/home/smgxsk1/Scratch/'
+    print('Creating retrieval script: ', retrievefilename)
+    print('Sending it to Legion ')
+    print(bringback)
+    sendout = 'scp '+ retrievefilename + ' smgxsk1@legion.rc.ucl.ac.uk:/home/smgxsk1/Scratch/global/'
     os.system(sendout)  
 
 #def reduce_space_on_supercomp_ind(hybdatadict, SDparams,defaultKKparams, paramtochange, listparamvalues, extralabel = None):
